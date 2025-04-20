@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const lawyers = [
     {
@@ -27,9 +28,9 @@ const lawyers = [
     },
     {
         name: 'Adv. Sakshi',
-        experience: '5 yrs',
+        experience: '10 yrs',
         location: '',
-        image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8cG90cmFpdHxlbnwwfHwwfHx8MA%3D%3D',
+        image: 'https://plus.unsplash.com/premium_photo-1668896122605-debd3fed81a4?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTd8fHBvdHJhaXR8ZW58MHx8MHx8fDA%3D',
         expertise: ['Insurance', 'Arbitration', 'Recovery', 'Bankruptcy', 'Cheque Bounce',
             'Cyber Crime', 'Consumer Court', 'Breach', 'Child Custody', 'Divorce',
             'Criminal', 'Motor Accident', 'Property', 'Anticipatory Bail', 'Domestic Violence'],
@@ -38,15 +39,16 @@ const lawyers = [
     },
     {
         name: 'Adv. Sam',
-        experience: '3 yrs',
+        experience: '10 yrs',
         location: '',
-        image: 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8cG90cmFpdHxlbnwwfHwwfHx8MA%3D%3D',
+        image: 'https://images.unsplash.com/photo-1625642123545-f0f68b1621e3?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fHBvdHJhaXR8ZW58MHx8MHx8fDA%3D',
         expertise: ['Insurance', 'Arbitration', 'Recovery', 'Bankruptcy', 'Cheque Bounce',
             'Cyber Crime', 'Consumer Court', 'Breach', 'Child Custody', 'Divorce',
             'Criminal', 'Motor Accident', 'Property', 'Anticipatory Bail', 'Domestic Violence'],
         rating: 4.2,
         reviews: '80+ ratings'
     },
+
 ];
 
 export default function LawyerPage() {
@@ -135,9 +137,11 @@ export default function LawyerPage() {
                 </div>
 
                 <div className="mt-10 text-center">
-                    <button className="bg-[#0B0B5C] text-white px-8 py-3 rounded-full font-semibold text-lg shadow hover:shadow-lg">
-                        Chat Now
-                    </button>
+                    <Link to={{ pathname: '/chat', state: { name: selected.name, image: selected.image } }}>
+                        <button className="bg-[#0B0B5C] text-white px-8 py-3 rounded-full font-semibold text-lg shadow hover:shadow-lg">
+                            Chat Now
+                        </button>
+                    </Link>
                 </div>
             </div>
         </div>

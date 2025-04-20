@@ -22,7 +22,7 @@ const Home = () => {
                 </div>
 
                 <div className='grid-cols-2'>
-                    <img className='w-full h-full' src='./home.png' alt="Hero" />
+                    <img className='w-[90vh] h-[80vh]' src='./home.png' alt="Hero" />
                 </div>
 
                 <div className='absolute left-1/2 transform -translate-x-1/2 bottom-[-15rem] flex gap-10 z-10'>
@@ -53,7 +53,14 @@ const Home = () => {
                 </div>
             </div>
 
-            <div className='about w-full h-[100vh] bg-zinc-500 bg-opacity-70 relative font-["Nunito"] overflow-hidden'>
+            <div className='about w-full h-[100vh] bg-zinc-500 bg-opacity-70 relative font-["Nunito"] overflow-hidden'
+            >
+                <div
+                    className="absolute inset-0 bg-cover bg-center opacity-70"
+                    style={{
+                        backgroundImage: 'url("https://images.unsplash.com/photo-1535905748047-14b2415c77d5?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8ZGFyayUyMGxpYnJhcnl8ZW58MHx8MHx8fDA%3D")',
+                    }}
+                />
                 <div className='text-[2rem] text-white tracking-tight absolute bottom-[24.2rem] left-24'>
                     ABOUT US
                 </div>
