@@ -1,15 +1,18 @@
 import React from "react";
-import Navbar from "./Navbar";
-import Home from "./Home"
-import Footer from "./Footer";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Layout from "./Layout";
+import Home from "./Home";
+import Lawyer from "./Lawyer";
 
-
-export default function HomePage() {
+export default function App() {
   return (
-    <>
-      <Navbar />
-      <Home />
-      <Footer />
-    </>
+    <Router>
+      <Routes>
+        <Route element={<Layout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/lawyer" element={<Lawyer />} />
+        </Route>
+      </Routes>
+    </Router>
   );
 }

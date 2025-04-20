@@ -1,5 +1,6 @@
 import React from 'react'
 import { FileText, Landmark } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 const Home = () => {
     return (
@@ -24,7 +25,6 @@ const Home = () => {
                     <img className='w-full h-full' src='./home.png' alt="Hero" />
                 </div>
 
-                {/* Floating Info Cards */}
                 <div className='absolute left-1/2 transform -translate-x-1/2 bottom-[-15rem] flex gap-10 z-10'>
                     <div className='bg-white rounded-xl shadow-lg  w-[350px] p-6 text-center'>
                         <FileText className='mx-auto mb-4 text-[#0B0B5C]' size={36} />
@@ -32,9 +32,12 @@ const Home = () => {
                         <p className='text-gray-600 mb-6'>
                             Join our platform to access trusted lawyers and free legal information, empowering you to resolve legal challenges with confidence and ease.
                         </p>
-                        <button className='bg-[#0B0B5C] text-white px-6 py-2 rounded-full font-semibold'>
-                            Find a Lawyer
-                        </button>
+                        <Link to="/lawyer">
+                            <button className="bg-[#0B0B5C] text-white px-6 py-2 rounded-full font-semibold">
+                                Find a Lawyer
+                            </button>
+                        </Link>
+
                     </div>
 
                     <div className='bg-white rounded-xl shadow-lg w-[350px] p-6 text-center'>
@@ -82,11 +85,11 @@ const Home = () => {
                     <div className='flex gap-6 overflow-x-auto scrollbar-hide pb-2'>
                         {[
                             { name: 'Adv. Rashmi Gupta', exp: '10 yrs', img: './lawyer1.jpg' },
-                            { name: 'Adv. Rahul Nohwal', exp: '35 yrs', img: './lawyer2.jpg' },
-                            { name: 'Adv. Shweta Ranjan', exp: '5 yrs', img: './lawyer3.jpg' },
-                            { name: 'Adv. Rashmi Gupta', exp: '12 yrs', img: './lawyer4.jpg' },
-                            { name: 'Adv. Ravinder Gupta', exp: '20 yrs', img: './lawyer5.jpg' },
-                            { name: 'Adv. Rashmi Gupta', exp: '30 yrs', img: './lawyer6.jpg' },
+                            { name: 'Adv. Rahul Nohwal', exp: '35 yrs', img: './lawyer1.jpg' },
+                            { name: 'Adv. Shweta Ranjan', exp: '5 yrs', img: './lawyer1.jpg' },
+                            { name: 'Adv. Rashmi Gupta', exp: '12 yrs', img: './lawyer1.jpg' },
+                            { name: 'Adv. Ravinder Gupta', exp: '20 yrs', img: './lawyer1.jpg' },
+                            { name: 'Adv. Rashmi Gupta', exp: '30 yrs', img: './lawyer1.jpg' },
                         ].map((lawyer, idx) => (
                             <div key={idx} className='bg-[#F7F7FB] rounded-xl p-4 text-center min-w-[180px] shadow-md'>
                                 <img src={lawyer.img} alt={lawyer.name} className='w-24 h-24 rounded-full mx-auto object-cover mb-3' />
@@ -124,7 +127,7 @@ const Home = () => {
                     </div>
 
                     <div className='h-[60vh] w-[40vh] bg-[#743714] rounded-[12vh] overflow-hidden'>
-                        <img className='object-cover h-[50vh]' src='https://s3-alpha-sig.figma.com/img/ebcd/4ef7/02bd3a527efd4bc03cdbc31e69fa8c7c?Expires=1745798400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=KUHdRSBWavzRTO7XL8m4QKvRDBkxfqnU27N3K7gCxLBZu6i8bNqX~WH6R0W4X9VMYQjIwjGAHa8wl2WCKjUtI1qbnYmy9at9FUGz0288qQxyjho-pJK5EbMN7ZRLNATloO-FQEEaPGfO~Gvbx~bAZ~uhferv3iYK1eUgt-qOIiq2e5NRIr04KMqjgM7V8aVgoYnK0JftF~AjvFYh7lJG5HrVKNLEBOEhJrFtR3l73dHte801jLQFWzpI2RQWcpYln4WPBLjueL9K7l0qd68MNN9xe7gCGWgbA1sus2xw8e7~~RlScK4QX5cxDnatGL-ib6Uhb1xx3DuTGrLfMdX-Jg__'>
+                        <img className='object-cover h-[50vh]' src='https://s3-alpha-sig.figma.com/img/4bbc/ec93/e24ebd8487ef2a67da9b67c7517eb8d3?Expires=1745798400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=tQa9m~oaKXlAQFJvjuwAdKpVQdIjIOnGUVV~pDUxahdxfN-R2heMvW4ud-OEL7jWUzoRjpcx-8ayPDdsDxD44DnHgvrfxbhO5CKu9jLCCBaezFhy6AqEXJrNqvv8~xG2hYu3yhFq03Fdcy15mH2MlU89-c8q3TEYF2KYNZYUkEzebua7yYqz0jx7elh4FEyRYwVlZyrtHKpmAnghlAhgBsAC6XzFrmY900rhMNKnvxHW1rZZIdQXGtCtHQ~sWvpR7nke7DDsG7ku3~Ttc80tl8GBEwLDYhSNrkr-mPr8GOkpXQFF9k3nDhh0n0L0Cq8TkjB1mvyBY5iNgu4Zjumbww__'>
                         </img>
                         <div className='text-center font-bold my-3 text-white text-xl'>
                             NOTARY<br /> SERVICE
@@ -132,7 +135,7 @@ const Home = () => {
                     </div>
 
                     <div className='h-[60vh] w-[40vh] bg-[#743714] rounded-[12vh] overflow-hidden'>
-                        <img className='object-cover h-[50vh]' src='https://s3-alpha-sig.figma.com/img/ebcd/4ef7/02bd3a527efd4bc03cdbc31e69fa8c7c?Expires=1745798400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=KUHdRSBWavzRTO7XL8m4QKvRDBkxfqnU27N3K7gCxLBZu6i8bNqX~WH6R0W4X9VMYQjIwjGAHa8wl2WCKjUtI1qbnYmy9at9FUGz0288qQxyjho-pJK5EbMN7ZRLNATloO-FQEEaPGfO~Gvbx~bAZ~uhferv3iYK1eUgt-qOIiq2e5NRIr04KMqjgM7V8aVgoYnK0JftF~AjvFYh7lJG5HrVKNLEBOEhJrFtR3l73dHte801jLQFWzpI2RQWcpYln4WPBLjueL9K7l0qd68MNN9xe7gCGWgbA1sus2xw8e7~~RlScK4QX5cxDnatGL-ib6Uhb1xx3DuTGrLfMdX-Jg__'>
+                        <img className='object-cover h-[50vh]' src='https://s3-alpha-sig.figma.com/img/3399/5f25/cb6bfaf99a8658383012ae606b977c6a?Expires=1745798400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=oe0IjtFZ2khJBLqi9hm6BzK65kVvdZ~MNeqf9c69OEzrBHGVXUFY57v1qgGClMXhCTXTr5GigfFHYvIaNCcikF0IG6feLQHCBaSQ7ws~J~P~YaRygPkG4a~eHWByvrMwmbycuug5UMCG8N2DdIBcuyvsQHfO4hEDE20ARAF0dYsiKaxtJgs3wRbjo6WXlWnEDatJsNhRzOONlJMt9Z0s4Jawo1bbZ7B5Wv7gUxOci9999CV98GcLfWEpRvI3wJ2V4jDLQQvIQiPqlFZxWsia~CozX3o-pZzomCUKnfjTKQI-MkrqG-9d2IURWMQ0H2mIS~4NSuLpWhOnHt4WGwcFgA__'>
                         </img>
                         <div className='text-center font-bold my-3 text-white text-xl'>
                             CASE<br /> STATUS
@@ -148,7 +151,7 @@ const Home = () => {
                         <h2 className='text-4xl font-bold text-black'>What Our Customers Say About Our Services</h2>
 
                         <div className='flex items-start mt-4'>
-                            <div className='text-[#743714] text-4xl mr-4'>“</div>
+                            <div className='text-[#743714] text-7xl mr-4'>“</div>
                             <p className='text-xl text-gray-700'>
                                 LegalEagle’s platform made filing my consumer court case seamless, with expert lawyer support and clear guidance!
                             </p>
@@ -187,7 +190,7 @@ const Home = () => {
 
             </div>
 
-        </div>
+        </div >
     )
 }
 
