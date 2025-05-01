@@ -46,9 +46,11 @@ const Home = () => {
                         <p className='text-gray-600 mb-6'>
                             Join our network of legal professionals to offer your services, connect with clients, and grow your practice with LegalEagle’s powerful platform.
                         </p>
-                        <button className='bg-[#743714] text-white px-6 py-2 rounded-full font-semibold'>
-                            Join as a Lawyer
-                        </button>
+                        <Link to="/login">
+                            <button className='bg-[#743714] text-white px-6 py-2 rounded-full font-semibold'>
+                                Join as a Lawyer
+                            </button>
+                        </Link>
                     </div>
                 </div>
             </div>
