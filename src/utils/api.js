@@ -71,7 +71,8 @@ export const registerLawyer = async (lawyerData) => {
 
 export const loginUser = async (credentials) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+    // First try to login with user credentials
+    let response = await fetch(`${API_BASE_URL}/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -79,14 +80,28 @@ export const loginUser = async (credentials) => {
       body: JSON.stringify(credentials)
     });
     
+    let data;
+    
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || `HTTP error! Status: ${response.status}`);
+      // If user login fails, try lawyer login
+      response = await fetch(`${API_BASE_URL}/lawyer/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(credentials)
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `HTTP error! Status: ${response.status}`);
+      }
+      
+      data = await response.json();
+    } else {
+      data = await response.json();
     }
     
-    const data = await response.json();
-    
-    // Store authentication info
     if (data.token) {
       localStorage.setItem('authToken', data.token);
       localStorage.setItem('user', JSON.stringify({

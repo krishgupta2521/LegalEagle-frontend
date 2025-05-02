@@ -36,10 +36,10 @@ export default function App() {
             
             {/* protected route */}
             <Route element={<ProtectedRoute><React.Fragment /></ProtectedRoute>}>
-              <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/chat" element={<Chat />} />
             </Route>
           </Route>
+          <Route path="/dashboard" element={<Dashboard />} />
 
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />

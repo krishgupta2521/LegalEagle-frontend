@@ -25,11 +25,11 @@ const LawyerRegister = () => {
         const { name, value } = e.target;
 
         if (name === "experience" && Number(value) < 0) {
-            return; // prevent negative input
+            return; 
         }
 
         if (name === "pricePerSession" && Number(value) < 0) {
-            return; // prevent negative price
+            return; 
         }
 
         setForm({ ...form, [name]: value });
@@ -86,14 +86,7 @@ const LawyerRegister = () => {
             
             if (response.success) {
                 alert("Lawyer Registered Successfully!");
-                
-                // If we received a token directly, go to the dashboard
-                if (response.token) {
-                    navigate('/dashboard');
-                } else {
-                    // Otherwise go to login page
-                    navigate('/login');
-                }
+                navigate('/login'); 
             }
         } catch (err) {
             setError(err.message || "Registration failed. Please try again.");

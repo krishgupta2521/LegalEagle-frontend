@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loginUser } from './utils/api';
+import { useAuth } from './utils/authContext';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -9,6 +10,7 @@ const Login = () => {
     const [form, setForm] = useState({ email: "", password: "" });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const { login } = useAuth();
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -44,11 +46,14 @@ const Login = () => {
                 password: form.password
             });
             
+            // Update auth context
+            login(response);
+            
             // Successful login, redirect based on role
             if (response.role === 'lawyer') {
-                navigate('/dashboard/lawyer');
+                navigate('/dashboard');
             } else {
-                navigate('/dashboard/user');
+                navigate('/dashboard');
             }
             
         } catch (err) {
