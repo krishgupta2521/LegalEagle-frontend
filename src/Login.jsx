@@ -2,129 +2,92 @@ import React, { useRef, useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Link } from "react-router-dom";
 
-const LawyerRegister = () => {
-    const eyeIconRef = useRef();
-    const passwordInputRef = useRef();
-    const [form, setForm] = useState({
-        fullname: "",
-        email: "",
-        phone: "",
-        license: "",
-        specialization: "",
-        experience: "",
-        username: "",
-        password: "",
-        confirmpassword: ""
-    });
-
-    const [lawyerList, setLawyerList] = useState([]);
+const Signup = () => {
+    const ref = useRef();
+    const passwordRef = useRef();
+    const [form, setForm] = useState({ email: "", username: "", password: "", confirmpassword: "" });
+    const [passwordArray, setPasswordArray] = useState([]);
 
     useEffect(() => {
-        const savedLawyers = localStorage.getItem("lawyers");
-        if (savedLawyers) {
-            setLawyerList(JSON.parse(savedLawyers));
+        const passwords = localStorage.getItem("passwords");
+        if (passwords) {
+            setPasswordArray(JSON.parse(passwords));
         }
     }, []);
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
-
-        if (name === "experience" && Number(value) < 0) {
-            return; // prevent negative input
-        }
-
-        setForm({ ...form, [name]: value });
+        setForm({ ...form, [e.target.name]: e.target.value });
     };
 
     const showPassword = () => {
-        if (passwordInputRef.current.type === "password") {
-            passwordInputRef.current.type = "text";
-            eyeIconRef.current.src = "/eyecross.png";
+        if (ref.current.src.includes("/eyecross.png")) {
+            ref.current.src = "/eye.png";
+            passwordRef.current.type = "password";
         } else {
-            passwordInputRef.current.type = "password";
-            eyeIconRef.current.src = "/eye.png";
+            passwordRef.current.type = "text";
+            ref.current.src = "/eyecross.png";
         }
     };
 
     const handleSubmit = () => {
-        const {
-            fullname, email, phone, license, specialization, experience,
-            username, password, confirmpassword
-        } = form;
-
-        if (!fullname || !email || !phone || !license || !specialization || !experience || !username || !password || !confirmpassword) {
-            alert("Please fill all fields.");
+        if (!form.email || !form.username || !form.password || !form.confirmpassword) {
+            alert("Fill up all the details");
+            return;
+        }
+        if (!form.email.includes("@")) {
+            alert("Enter a valid email address");
+            return;
+        }
+        if (form.password !== form.confirmpassword) {
+            alert("Passwords do not match");
             return;
         }
 
-        if (!email.includes("@")) {
-            alert("Enter a valid email address.");
-            return;
-        }
+        const newEntry = { ...form, id: uuidv4() };
+        const updatedArray = [...passwordArray, newEntry];
+        setPasswordArray(updatedArray);
+        localStorage.setItem("passwords", JSON.stringify(updatedArray));
+        setForm({ email: "", username: "", password: "", confirmpassword: "" });
 
-        if (password !== confirmpassword) {
-            alert("Passwords do not match.");
-            return;
-        }
-
-        const newLawyer = { ...form, id: uuidv4() };
-        const updatedLawyers = [...lawyerList, newLawyer];
-
-        setLawyerList(updatedLawyers);
-        localStorage.setItem("lawyers", JSON.stringify(updatedLawyers));
-
-        alert("Lawyer Registered Successfully!");
-
-        setForm({
-            fullname: "",
-            email: "",
-            phone: "",
-            license: "",
-            specialization: "",
-            experience: "",
-            username: "",
-            password: "",
-            confirmpassword: ""
-        });
+        alert("Registration Successful!");
     };
 
     return (
         <div className="flex min-h-screen w-full">
             <div className="w-1/2 flex justify-center items-center p-10">
                 <div className="w-96 text-center">
-                    <h2 className="text-5xl font-bold mb-10">Lawyer Registration</h2>
-
-                    <input name="fullname" placeholder="Full Name" type="text" value={form.fullname} onChange={handleChange}
-                        className='w-full p-3 mb-4 border border-blue-900 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-700' />
-                    <input name="email" placeholder="Email" type="email" value={form.email} onChange={handleChange}
-                        className='w-full p-3 mb-4 border border-blue-900 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-700' />
-                    <input name="phone" placeholder="Phone Number" type="tel" value={form.phone} onChange={handleChange}
-                        className='w-full p-3 mb-4 border border-blue-900 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-700' />
-
-                    <input name="license" placeholder="License Number" type="text" value={form.license} onChange={handleChange}
-                        className='w-full p-3 mb-4 border border-blue-900 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-700' />
-                    <input name="specialization" placeholder="Specialization (e.g. Criminal Law)" type="text" value={form.specialization} onChange={handleChange}
-                        className='w-full p-3 mb-4 border border-blue-900 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-700' />
-                    <input name="experience" placeholder="Years of Experience" type="number" value={form.experience} onChange={handleChange}
-                        className='w-full p-3 mb-4 border border-blue-900 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-700' />
-
-                    <input name="username" placeholder="Username" type="text" value={form.username} onChange={handleChange}
-                        className='w-full p-3 mb-4 border border-blue-900 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-700' />
-
+                    <h2 className="text-6xl font-bold mb-14 tracking-tight subpixel-antialiased">REGISTER</h2>
+                    <input
+                        value={form.email}
+                        onChange={handleChange}
+                        placeholder='Enter Email'
+                        className='w-full p-3 mb-6 border border-blue-900 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-700'
+                        type="email"
+                        name="email"
+                    />
+                    <input
+                        value={form.username}
+                        onChange={handleChange}
+                        placeholder='Enter Username'
+                        className='w-full p-3 mb-6 border border-blue-900 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-700'
+                        type="text"
+                        name="username"
+                    />
                     <div className="relative w-full">
                         <input
-                            ref={passwordInputRef}
-                            name="password"
-                            placeholder="Password"
-                            type="password"
+                            ref={passwordRef}
                             value={form.password}
                             onChange={handleChange}
-                            className='w-full p-3 pr-10 mb-4 border border-blue-900 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-700'
+                            placeholder='Enter Password'
+                            className='w-full p-3 pr-10 mb-6 border border-blue-900 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-700'
+                            type="password"
+                            name="password"
                         />
                         <span className='absolute right-3 top-3 cursor-pointer' onClick={showPassword}>
-                            <img ref={eyeIconRef} width={28} src="/eye.png" alt="Toggle Password" />
+                            <img ref={ref} width={28} src="/eye.png" alt="eye toggle" />
                         </span>
                     </div>
+<<<<<<< HEAD
 
                     <input name="confirmpassword" placeholder="Confirm Password" type="password" value={form.confirmpassword} onChange={handleChange}
                         className='w-full p-3 mb-6 border border-blue-900 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-700' />
@@ -137,12 +100,28 @@ const LawyerRegister = () => {
                             Register
                         </button>
                     </Link>
+=======
+                    <input
+                        value={form.confirmpassword}
+                        onChange={handleChange}
+                        placeholder='Confirm Password'
+                        className='w-full p-3 mb-6 border border-blue-900 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-700'
+                        type="password"
+                        name="confirmpassword"
+                    />
+                    <button
+                        onClick={handleSubmit}
+                        className='w-full cursor-pointer animate-bounce mt-6 bg-[#0B0B5C] text-white font-bold p-3 rounded-full hover:bg-purple-800 transition duration-200'
+                    >
+                        Continue
+                    </button>
+>>>>>>> f736ec0dd6ed5fc2328c9320228628aee6765c02
                 </div>
             </div>
 
-            <div className="w-1/2 h-100vh bg-cover bg-center border-2 border-solid" style={{ backgroundImage: "url('/login.webp')" }}></div>
+            <div className="w-1/2 h-screen bg-cover bg-center border-2 border-solid" style={{ backgroundImage: "url('/signup.jpg')" }}></div>
         </div>
     );
 };
 
-export default LawyerRegister;
+export default Signup;

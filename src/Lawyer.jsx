@@ -1,58 +1,55 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-
-const lawyers = [
-    {
-        name: 'Adv. Rashmi Gupta',
-        experience: '15 yrs',
-        location: 'Govind Nagar, Nashik',
-        image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fHBvdHJhaXR8ZW58MHx8MHx8fDA%3D',
-        expertise: [
-            'Insurance', 'Arbitration', 'Recovery', 'Bankruptcy', 'Cheque Bounce',
-            'Cyber Crime', 'Consumer Court', 'Breach', 'Child Custody', 'Divorce',
-            'Criminal', 'Motor Accident', 'Property', 'Anticipatory Bail', 'Domestic Violence'
-        ],
-        rating: 4.5,
-        reviews: '100+ ratings'
-    },
-    {
-        name: 'Adv. Harry',
-        experience: '10 yrs',
-        location: '',
-        image: 'https://images.unsplash.com/photo-1566753323558-f4e0952af115?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fHBvdHJhaXR8ZW58MHx8MHx8fDA%3D',
-        expertise: ['Insurance', 'Arbitration', 'Recovery', 'Bankruptcy', 'Cheque Bounce',
-            'Cyber Crime', 'Consumer Court', 'Breach', 'Child Custody', 'Divorce',
-            'Criminal', 'Motor Accident', 'Property', 'Anticipatory Bail', 'Domestic Violence'],
-        rating: 4.2,
-        reviews: '80+ ratings'
-    },
-    {
-        name: 'Adv. Sakshi',
-        experience: '10 yrs',
-        location: '',
-        image: 'https://plus.unsplash.com/premium_photo-1668896122605-debd3fed81a4?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTd8fHBvdHJhaXR8ZW58MHx8MHx8fDA%3D',
-        expertise: ['Insurance', 'Arbitration', 'Recovery', 'Bankruptcy', 'Cheque Bounce',
-            'Cyber Crime', 'Consumer Court', 'Breach', 'Child Custody', 'Divorce',
-            'Criminal', 'Motor Accident', 'Property', 'Anticipatory Bail', 'Domestic Violence'],
-        rating: 4.2,
-        reviews: '80+ ratings'
-    },
-    {
-        name: 'Adv. Sam',
-        experience: '10 yrs',
-        location: '',
-        image: 'https://images.unsplash.com/photo-1625642123545-f0f68b1621e3?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fHBvdHJhaXR8ZW58MHx8MHx8fDA%3D',
-        expertise: ['Insurance', 'Arbitration', 'Recovery', 'Bankruptcy', 'Cheque Bounce',
-            'Cyber Crime', 'Consumer Court', 'Breach', 'Child Custody', 'Divorce',
-            'Criminal', 'Motor Accident', 'Property', 'Anticipatory Bail', 'Domestic Violence'],
-        rating: 4.2,
-        reviews: '80+ ratings'
-    },
-
-];
+import { fetchLawyers } from './utils/api';
 
 export default function LawyerPage() {
-    const [selected, setSelected] = useState(lawyers[0]);
+    const [lawyers, setLawyers] = useState([]);
+    const [selected, setSelected] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const getLawyers = async () => {
+            try {
+                setIsLoading(true);
+                const data = await fetchLawyers();
+                
+                if (!data || data.length === 0) {
+                    setError('No lawyer data available at the moment.');
+                    setLawyers([]);
+                    setSelected(null);
+                    return;
+                }
+                
+                const transformedData = data.map(lawyer => ({
+                    name: lawyer.name,
+                    experience: `${lawyer.experience} yrs`,
+                    location: lawyer.location || 'Not specified',
+                    image: lawyer.image || 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fHBvdHJhaXR8ZW58MHx8MHx8fDA%3D',
+                    expertise: lawyer.specialization ? [lawyer.specialization] : ['General Practice'],
+                    rating: lawyer.rating || 4.0,
+                    reviews: lawyer.reviews || '50+ ratings'
+                }));
+                
+                setLawyers(transformedData);
+                setSelected(transformedData[0]);
+                setError(null);
+            } catch (err) {
+                console.error('Error fetching lawyers:', err);
+                setError('Failed to load lawyers. The service might be unavailable.');
+                setLawyers([]);
+                setSelected(null);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        getLawyers();
+    }, []);
+
+    const handleSearch = () => {
+        console.log("Search functionality to be implemented");
+    };
 
     return (
         <div className="min-h-screen text-black">
@@ -71,78 +68,111 @@ export default function LawyerPage() {
                 <input className="border px-4 py-2 rounded w-1/4" placeholder="Area of Law" />
                 <input className="border px-4 py-2 rounded w-1/4" placeholder="Years of Experience" />
                 <input className="border px-4 py-2 rounded w-1/4" placeholder="Select Location" />
-                <button className="bg-[#0B0B5C] text-white px-6 py-2 rounded-full font-semibold">Search Lawyer</button>
+                <button onClick={handleSearch} className="bg-[#0B0B5C] text-white px-6 py-2 rounded-full font-semibold">Search Lawyer</button>
             </div>
 
+            {/* First component: Lawyer listing section */}
             <div className="px-10 mt-16">
                 <h2 className="text-[#0B0B5C] font-semibold text-xl mb-4">CHOOSE YOUR LAWYER</h2>
-                <div className="flex gap-6 overflow-x-auto pb-4">
-                    {lawyers.map((lawyer, index) => (
-                        <div
-                            key={index}
-                            className="bg-white text-black rounded-xl p-4 w-52 cursor-pointer shadow hover:shadow-lg"
-                            onClick={() => setSelected(lawyer)}
-                        >
-                            <div className="h-40 bg-gray-200 rounded-lg mb-3">
-                                {lawyer.image ? (
-                                    <img src={lawyer.image} alt={lawyer.name} className="h-full w-full object-cover rounded-lg" />
+                
+                {isLoading ? (
+                    <div className="flex justify-center items-center py-10">
+                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#0B0B5C]"></div>
+                    </div>
+                ) : error ? (
+                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative my-6" role="alert">
+                        <span className="block sm:inline">{error}</span>
+                    </div>
+                ) : lawyers.length === 0 ? (
+                    <div className="text-center py-10 text-gray-500">
+                        No lawyers available at this time.
+                    </div>
+                ) : (
+                    <div className="flex gap-6 overflow-x-auto pb-4">
+                        {lawyers.map((lawyer, index) => (
+                            <div
+                                key={index}
+                                className="bg-white text-black rounded-xl p-4 w-52 cursor-pointer shadow hover:shadow-lg"
+                                onClick={() => setSelected(lawyer)}
+                            >
+                                <div className="h-40 bg-gray-200 rounded-lg mb-3">
+                                    {lawyer.image ? (
+                                        <img src={lawyer.image} alt={lawyer.name} className="h-full w-full object-cover rounded-lg" />
+                                    ) : (
+                                        <div className="h-full w-full bg-gray-400 flex items-center justify-center text-white rounded-lg">
+                                            No Image
+                                        </div>
+                                    )}
+                                </div>
+                                <h4 className="font-semibold text-center">{lawyer.name}</h4>
+                                <p className="text-center">Exp: {lawyer.experience}</p>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            {/* Second component: Selected lawyer details section */}
+            <div className="mt-16 mx-10">
+                {isLoading ? (
+                    <div className="flex justify-center items-center py-10">
+                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#0B0B5C]"></div>
+                    </div>
+                ) : !selected && !error ? (
+                    <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative" role="alert">
+                        <span className="block sm:inline">No lawyer selected. Please choose a lawyer from the list above.</span>
+                    </div>
+                ) : error ? (
+                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                        <span className="block sm:inline">Cannot display lawyer details:</span>
+                    </div>
+                ) : selected && (
+                    <div className="bg-white p-8 rounded-xl text-black">
+                        <div className="flex items-center gap-6">
+                            <div className="h-28 w-28 rounded-full bg-gray-300">
+                                {selected.image ? (
+                                    <img src={selected.image} alt={selected.name} className="h-full w-full object-cover rounded-full" />
                                 ) : (
-                                    <div className="h-full w-full bg-gray-400 flex items-center justify-center text-white rounded-lg">
+                                    <div className="flex items-center justify-center h-full w-full bg-gray-400 rounded-full text-white">
                                         No Image
                                     </div>
                                 )}
                             </div>
-                            <h4 className="font-semibold text-center">{lawyer.name}</h4>
-                            <p className="text-center">Exp: {lawyer.experience}</p>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            <div className="bg-white mt-16 mx-10 p-8 rounded-xl text-black">
-                <div className="flex items-center gap-6">
-                    <div className="h-28 w-28 rounded-full bg-gray-300">
-                        {selected.image ? (
-                            <img src={selected.image} alt={selected.name} className="h-full w-full object-cover rounded-full" />
-                        ) : (
-                            <div className="flex items-center justify-center h-full w-full bg-gray-400 rounded-full text-white">
-                                No Image
+                            <div>
+                                <h2 className="text-xl font-bold">Advocate {selected.name.split(' ')[1]} {selected.name.split(' ')[2]}</h2>
+                                <p className="text-sm">Location - {selected.location || 'Not specified'}</p>
+                                <p className="text-sm">Experience - {selected.experience}</p>
+                                <div className="flex items-center gap-2 mt-2">
+                                    <span className="bg-[#0B0B5C] text-white text-xs px-2 py-1 rounded">{selected.rating} ★</span>
+                                    <span className="text-xs text-gray-600">{selected.reviews}</span>
+                                </div>
                             </div>
-                        )}
-                    </div>
-                    <div>
-                        <h2 className="text-xl font-bold">Advocate {selected.name.split(' ')[1]} {selected.name.split(' ')[2]}</h2>
-                        <p className="text-sm">Location - {selected.location || 'Not specified'}</p>
-                        <p className="text-sm">Experience - {selected.experience}</p>
-                        <div className="flex items-center gap-2 mt-2">
-                            <span className="bg-[#0B0B5C] text-white text-xs px-2 py-1 rounded">{selected.rating} ★</span>
-                            <span className="text-xs text-gray-600">{selected.reviews}</span>
+                        </div>
+
+                        <div className="flex gap-6 mt-6 font-semibold text-sm">
+                            <button className="text-[#0B0B5C]">Expertise</button>
+                            <button>Profile</button>
+                            <button>Top Review</button>
+                            <button>Answers</button>
+                        </div>
+
+                        <div className="flex flex-wrap gap-4 mt-6">
+                            {selected.expertise.map((item, i) => (
+                                <span key={i} className="px-4 py-2 bg-white border border-[#0B0B5C] text-[#0B0B5C] rounded-full text-sm">
+                                    {item}
+                                </span>
+                            ))}
+                        </div>
+
+                        <div className="mt-10 text-center">
+                            <Link to={{ pathname: '/chat', state: { name: selected.name, image: selected.image } }}>
+                                <button className="bg-[#0B0B5C] text-white px-8 py-3 rounded-full font-semibold text-lg shadow hover:shadow-lg">
+                                    Chat Now
+                                </button>
+                            </Link>
                         </div>
                     </div>
-                </div>
-
-                <div className="flex gap-6 mt-6 font-semibold text-sm">
-                    <button className="text-[#0B0B5C]">Expertise</button>
-                    <button>Profile</button>
-                    <button>Top Review</button>
-                    <button>Answers</button>
-                </div>
-
-                <div className="flex flex-wrap gap-4 mt-6">
-                    {selected.expertise.map((item, i) => (
-                        <span key={i} className="px-4 py-2 bg-white border border-[#0B0B5C] text-[#0B0B5C] rounded-full text-sm">
-                            {item}
-                        </span>
-                    ))}
-                </div>
-
-                <div className="mt-10 text-center">
-                    <Link to={{ pathname: '/chat', state: { name: selected.name, image: selected.image } }}>
-                        <button className="bg-[#0B0B5C] text-white px-8 py-3 rounded-full font-semibold text-lg shadow hover:shadow-lg">
-                            Chat Now
-                        </button>
-                    </Link>
-                </div>
+                )}
             </div>
         </div>
     );
