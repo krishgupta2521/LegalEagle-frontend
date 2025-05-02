@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
     Phone,
     Mail,
@@ -7,10 +7,28 @@ import {
     Linkedin,
     Instagram,
     ArrowUpRight,
+    Wallet,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "./utils/authContext";
+import { fetchWalletBalance } from "./utils/api";
 
 export default function Navbar() {
+    const { user, logout } = useAuth();
+    const [walletBalance, setWalletBalance] = useState(null);
+
+    useEffect(() => {
+        if (user && user.role === 'user') {
+            fetchWalletBalance()
+                .then(data => setWalletBalance(data.balance))
+                .catch(err => console.error('Error fetching wallet balance:', err));
+        }
+    }, [user]);
+
+    const handleLogout = async () => {
+        await logout();
+    };
+
     return (
         <div className="w-full">
             <div className="bg-[#0B0B5C] text-white text-sm">
@@ -62,19 +80,45 @@ export default function Navbar() {
                     </nav>
 
                     <div className="flex items-center space-x-4">
-                        <Link to="/signup">
-                            <button className="flex items-center text-[#0B0B5C] font-semibold space-x-2">
-                                Sign Up
-                            </button>
-                        </Link>
+                        {user ? (
+                            <>
+                                {user.role === 'user' && (
+                                    <Link to="/wallet" className="flex items-center text-[#0B0B5C] font-medium">
+                                        <span className="mr-2">
+                                            <Wallet size={18} />
+                                        </span>
+                                        {walletBalance !== null ? `₹${walletBalance}` : 'Wallet'}
+                                    </Link>
+                                )}
+                                <Link to={user.role === 'lawyer' ? '/dashboard' : '/lawyer'}>
+                                    <button className="bg-[#683B14] text-white font-medium px-6 py-2 rounded-full">
+                                        {user.role === 'lawyer' ? 'Dashboard' : 'Find Lawyers'}
+                                    </button>
+                                </Link>
+                                <button
+                                    onClick={handleLogout}
+                                    className="text-[#0B0B5C] font-semibold space-x-2"
+                                >
+                                    Logout
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <Link to="/login">
+                                    <button className="flex items-center text-[#0B0B5C] font-semibold space-x-2">
+                                        Sign In
+                                    </button>
+                                </Link>
 
-                        <div className="border border-[#0B0B5C] rounded-full p-1">
-                            <ArrowUpRight size={16} />
-                        </div>
+                                <div className="border border-[#0B0B5C] rounded-full p-1">
+                                    <ArrowUpRight size={16} />
+                                </div>
 
-                        <button className="bg-[#683B14] text-white font-medium px-6 py-2 rounded-full">
-                            Contact Us
-                        </button>
+                                <button className="bg-[#683B14] text-white font-medium px-6 py-2 rounded-full">
+                                    Contact Us
+                                </button>
+                            </>
+                        )}
                     </div>
                 </div>
             </header>
