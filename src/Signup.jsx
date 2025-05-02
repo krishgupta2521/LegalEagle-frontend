@@ -1,9 +1,13 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { v4 as uuidv4 } from 'uuid';
+import React, { useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { registerLawyer } from './utils/api';
 
 const LawyerRegister = () => {
+    const navigate = useNavigate();
     const eyeIconRef = useRef();
     const passwordInputRef = useRef();
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
     const [form, setForm] = useState({
         fullname: "",
         email: "",
@@ -11,25 +15,21 @@ const LawyerRegister = () => {
         license: "",
         specialization: "",
         experience: "",
+        pricePerSession: "",
         username: "",
         password: "",
         confirmpassword: ""
     });
-
-    const [lawyerList, setLawyerList] = useState([]);
-
-    useEffect(() => {
-        const savedLawyers = localStorage.getItem("lawyers");
-        if (savedLawyers) {
-            setLawyerList(JSON.parse(savedLawyers));
-        }
-    }, []);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
 
         if (name === "experience" && Number(value) < 0) {
             return; // prevent negative input
+        }
+
+        if (name === "pricePerSession" && Number(value) < 0) {
+            return; // prevent negative price
         }
 
         setForm({ ...form, [name]: value });
@@ -45,46 +45,61 @@ const LawyerRegister = () => {
         }
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         const {
             fullname, email, phone, license, specialization, experience,
-            username, password, confirmpassword
+            pricePerSession, username, password, confirmpassword
         } = form;
 
-        if (!fullname || !email || !phone || !license || !specialization || !experience || !username || !password || !confirmpassword) {
-            alert("Please fill all fields.");
+        if (!fullname || !email || !phone || !license || !specialization || !experience || !pricePerSession || !username || !password || !confirmpassword) {
+            setError("Please fill all fields.");
             return;
         }
 
         if (!email.includes("@")) {
-            alert("Enter a valid email address.");
+            setError("Enter a valid email address.");
             return;
         }
 
         if (password !== confirmpassword) {
-            alert("Passwords do not match.");
+            setError("Passwords do not match.");
             return;
         }
 
-        const newLawyer = { ...form, id: uuidv4() };
-        const updatedLawyers = [...lawyerList, newLawyer];
-
-        setLawyerList(updatedLawyers);
-        localStorage.setItem("lawyers", JSON.stringify(updatedLawyers));
-
-        alert("Lawyer Registered Successfully!");
-
-        setForm({
-            fullname: "",
-            email: "",
-            phone: "",
-            license: "",
-            specialization: "",
-            experience: "",
-            username: "",
-            password: "",
-            confirmpassword: ""
-        });
+        try {
+            setLoading(true);
+            setError(null);
+            
+            const lawyerData = {
+                name: fullname,
+                email,
+                phone,
+                license,
+                specialization,
+                experience: Number(experience),
+                pricePerSession: Number(pricePerSession),
+                username,
+                password,
+            };
+            
+            const response = await registerLawyer(lawyerData);
+            
+            if (response.success) {
+                alert("Lawyer Registered Successfully!");
+                
+                // If we received a token directly, go to the dashboard
+                if (response.token) {
+                    navigate('/dashboard');
+                } else {
+                    // Otherwise go to login page
+                    navigate('/login');
+                }
+            }
+        } catch (err) {
+            setError(err.message || "Registration failed. Please try again.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -92,6 +107,12 @@ const LawyerRegister = () => {
             <div className="w-1/2 flex justify-center items-center p-10">
                 <div className="w-96 text-center">
                     <h2 className="text-5xl font-bold mb-10">Lawyer Registration</h2>
+                    
+                    {error && (
+                        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg">
+                            {error}
+                        </div>
+                    )}
 
                     <input name="fullname" placeholder="Full Name" type="text" value={form.fullname} onChange={handleChange}
                         className='w-full p-3 mb-4 border border-blue-900 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-700' />
@@ -105,6 +126,8 @@ const LawyerRegister = () => {
                     <input name="specialization" placeholder="Specialization (e.g. Criminal Law)" type="text" value={form.specialization} onChange={handleChange}
                         className='w-full p-3 mb-4 border border-blue-900 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-700' />
                     <input name="experience" placeholder="Years of Experience" type="number" value={form.experience} onChange={handleChange}
+                        className='w-full p-3 mb-4 border border-blue-900 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-700' />
+                    <input name="pricePerSession" placeholder="Price Per Session (₹)" type="number" value={form.pricePerSession} onChange={handleChange}
                         className='w-full p-3 mb-4 border border-blue-900 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-700' />
 
                     <input name="username" placeholder="Username" type="text" value={form.username} onChange={handleChange}
@@ -130,9 +153,10 @@ const LawyerRegister = () => {
 
                     <button
                         onClick={handleSubmit}
-                        className='w-full mt-4 bg-[#0B0B5C] text-white font-bold p-3 rounded-full hover:bg-purple-800 transition duration-200'
+                        disabled={loading}
+                        className='w-full mt-4 bg-[#0B0B5C] text-white font-bold p-3 rounded-full hover:bg-purple-800 transition duration-200 disabled:bg-gray-400'
                     >
-                        Register
+                        {loading ? 'Registering...' : 'Register'}
                     </button>
                 </div>
             </div>

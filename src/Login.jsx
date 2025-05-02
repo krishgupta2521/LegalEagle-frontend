@@ -1,19 +1,14 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { v4 as uuidv4 } from 'uuid';
-import { Link } from "react-router-dom";
+import React, { useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { loginUser } from './utils/api';
 
-const Signup = () => {
+const Login = () => {
+    const navigate = useNavigate();
     const ref = useRef();
     const passwordRef = useRef();
-    const [form, setForm] = useState({ email: "", username: "", password: "", confirmpassword: "" });
-    const [passwordArray, setPasswordArray] = useState([]);
-
-    useEffect(() => {
-        const passwords = localStorage.getItem("passwords");
-        if (passwords) {
-            setPasswordArray(JSON.parse(passwords));
-        }
-    }, []);
+    const [form, setForm] = useState({ email: "", password: "" });
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -29,34 +24,52 @@ const Signup = () => {
         }
     };
 
-    const handleSubmit = () => {
-        if (!form.email || !form.username || !form.password || !form.confirmpassword) {
-            alert("Fill up all the details");
+    const handleSubmit = async () => {
+        if (!form.email || !form.password) {
+            setError("Fill up all the details");
             return;
         }
+        
         if (!form.email.includes("@")) {
-            alert("Enter a valid email address");
-            return;
-        }
-        if (form.password !== form.confirmpassword) {
-            alert("Passwords do not match");
+            setError("Enter a valid email address");
             return;
         }
 
-        const newEntry = { ...form, id: uuidv4() };
-        const updatedArray = [...passwordArray, newEntry];
-        setPasswordArray(updatedArray);
-        localStorage.setItem("passwords", JSON.stringify(updatedArray));
-        setForm({ email: "", username: "", password: "", confirmpassword: "" });
-
-        alert("Registration Successful!");
+        try {
+            setLoading(true);
+            setError(null);
+            
+            const response = await loginUser({
+                email: form.email,
+                password: form.password
+            });
+            
+            // Successful login, redirect based on role
+            if (response.role === 'lawyer') {
+                navigate('/dashboard/lawyer');
+            } else {
+                navigate('/dashboard/user');
+            }
+            
+        } catch (err) {
+            setError(err.message || "Login failed. Please check your credentials.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
         <div className="flex min-h-screen w-full">
             <div className="w-1/2 flex justify-center items-center p-10">
                 <div className="w-96 text-center">
-                    <h2 className="text-6xl font-bold mb-14 tracking-tight subpixel-antialiased">REGISTER</h2>
+                    <h2 className="text-6xl font-bold mb-14 tracking-tight subpixel-antialiased">LOGIN</h2>
+                    
+                    {error && (
+                        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg">
+                            {error}
+                        </div>
+                    )}
+                    
                     <input
                         value={form.email}
                         onChange={handleChange}
@@ -65,14 +78,7 @@ const Signup = () => {
                         type="email"
                         name="email"
                     />
-                    <input
-                        value={form.username}
-                        onChange={handleChange}
-                        placeholder='Enter Username'
-                        className='w-full p-3 mb-6 border border-blue-900 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-700'
-                        type="text"
-                        name="username"
-                    />
+                    
                     <div className="relative w-full">
                         <input
                             ref={passwordRef}
@@ -87,35 +93,14 @@ const Signup = () => {
                             <img ref={ref} width={28} src="/eye.png" alt="eye toggle" />
                         </span>
                     </div>
-<<<<<<< HEAD
-
-                    <input name="confirmpassword" placeholder="Confirm Password" type="password" value={form.confirmpassword} onChange={handleChange}
-                        className='w-full p-3 mb-6 border border-blue-900 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-700' />
-
-                    <Link to="/dashboard">
-                        <button
-                            onClick={handleSubmit}
-                            className='w-full mt-4 bg-[#0B0B5C] text-white font-bold p-3 rounded-full hover:bg-purple-800 transition duration-200'
-                        >
-                            Register
-                        </button>
-                    </Link>
-=======
-                    <input
-                        value={form.confirmpassword}
-                        onChange={handleChange}
-                        placeholder='Confirm Password'
-                        className='w-full p-3 mb-6 border border-blue-900 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-700'
-                        type="password"
-                        name="confirmpassword"
-                    />
+                    
                     <button
                         onClick={handleSubmit}
-                        className='w-full cursor-pointer animate-bounce mt-6 bg-[#0B0B5C] text-white font-bold p-3 rounded-full hover:bg-purple-800 transition duration-200'
+                        disabled={loading}
+                        className='w-full cursor-pointer mt-6 bg-[#0B0B5C] text-white font-bold p-3 rounded-full hover:bg-purple-800 transition duration-200 disabled:bg-gray-400'
                     >
-                        Continue
+                        {loading ? 'Logging in...' : 'Login'}
                     </button>
->>>>>>> f736ec0dd6ed5fc2328c9320228628aee6765c02
                 </div>
             </div>
 
@@ -124,4 +109,4 @@ const Signup = () => {
     );
 };
 
-export default Signup;
+export default Login;
