@@ -30,8 +30,8 @@ const Signup = () => {
     };
 
     const handleSubmit = () => {
-        if (!form.email || !form.username || !form.password || !form.confirmpassword) {
-            alert("Fill up all the details");
+        if (!form.email || !form.username || !form.password || !form.confirmpassword || !role) {
+            alert("Fill up all the details and choose a role.");
             return;
         }
         if (!form.email.includes("@")) {
@@ -43,13 +43,14 @@ const Signup = () => {
             return;
         }
 
-        const newEntry = { ...form, id: uuidv4() };
+        const newEntry = { ...form, role, id: uuidv4() };
         const updatedArray = [...passwordArray, newEntry];
         setPasswordArray(updatedArray);
         localStorage.setItem("passwords", JSON.stringify(updatedArray));
         setForm({ email: "", username: "", password: "", confirmpassword: "" });
+        setRole(null);
 
-        alert("Registration Successful!");
+        alert(`Registration Successful as ${role === "lawyer" ? "Lawyer" : "Client"}!`);
     };
 
     return (
@@ -57,6 +58,7 @@ const Signup = () => {
             <div className="w-1/2 flex justify-center items-center p-10">
                 <div className="w-96 text-center">
                     <h2 className="text-6xl font-bold mb-14 tracking-tight subpixel-antialiased">REGISTER</h2>
+
                     <input
                         value={form.email}
                         onChange={handleChange}
@@ -73,6 +75,7 @@ const Signup = () => {
                         type="text"
                         name="username"
                     />
+
                     <div className="relative w-full">
                         <input
                             ref={passwordRef}
@@ -87,40 +90,45 @@ const Signup = () => {
                             <img ref={ref} width={28} src="/eye.png" alt="eye toggle" />
                         </span>
                     </div>
-<<<<<<< HEAD
 
-                    <input name="confirmpassword" placeholder="Confirm Password" type="password" value={form.confirmpassword} onChange={handleChange}
-                        className='w-full p-3 mb-6 border border-blue-900 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-700' />
-
-                    <Link to="/dashboard">
-                        <button
-                            onClick={handleSubmit}
-                            className='w-full mt-4 bg-[#0B0B5C] text-white font-bold p-3 rounded-full hover:bg-purple-800 transition duration-200'
-                        >
-                            Register
-                        </button>
-                    </Link>
-=======
                     <input
+                        name="confirmpassword"
+                        placeholder="Confirm Password"
+                        type="password"
                         value={form.confirmpassword}
                         onChange={handleChange}
-                        placeholder='Confirm Password'
                         className='w-full p-3 mb-6 border border-blue-900 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-700'
-                        type="password"
-                        name="confirmpassword"
                     />
+
+
                     <button
                         onClick={handleSubmit}
-                        className='w-full cursor-pointer animate-bounce mt-6 bg-[#0B0B5C] text-white font-bold p-3 rounded-full hover:bg-purple-800 transition duration-200'
+                        className='w-full mt-4 bg-[#0B0B5C] text-white font-bold p-3 rounded-full hover:bg-blue-800 transition duration-200'
                     >
                         Continue
                     </button>
->>>>>>> f736ec0dd6ed5fc2328c9320228628aee6765c02
+
+
+                    <div className="mt-6 flex space-x-6 justify-center text-[1.2rem]">
+                        <p
+                            className="text-blue-700 cursor-pointer hover:underline"
+                        >
+                            <Link to="/signup"> Sign Up</Link>
+                        </p>
+                        <p
+                            s className="text-green-700 cursor-pointer hover:underline"
+                        >
+                            <Link to="/login"> LogIn as Lawyer</Link>
+                        </p>
+                    </div>
                 </div>
             </div>
 
-            <div className="w-1/2 h-screen bg-cover bg-center border-2 border-solid" style={{ backgroundImage: "url('/signup.jpg')" }}></div>
-        </div>
+            <div
+                className="w-1/2 h-screen bg-cover bg-center border-2 border-solid"
+                style={{ backgroundImage: "url('/signup.jpg')" }}
+            ></div>
+        </div >
     );
 };
 

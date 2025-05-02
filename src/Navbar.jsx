@@ -62,7 +62,7 @@ export default function Navbar() {
                     </nav>
 
                     <div className="flex items-center space-x-4">
-                        <Link to="/signup">
+                        <Link to="/login">
                             <button className="flex items-center text-[#0B0B5C] font-semibold space-x-2">
                                 Sign Up
                             </button>

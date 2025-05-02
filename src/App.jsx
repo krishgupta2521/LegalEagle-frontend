@@ -5,8 +5,9 @@ import Home from "./Home";
 import Lawyer from "./Lawyer";
 import Chat from "./Chat";
 import Login from "./Login";
-import Signup from "./Signup"
+import LawyerLogin from "./LawyerLogin"
 import Dashboard from "./Dashboard";
+import Signup from "./Signup";
 
 export default function App() {
   return (
@@ -16,9 +17,11 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/lawyer" element={<Lawyer />} />
           <Route path="/chat" element={<Chat />} />
-          <Route path="/dashboard" element={<Dashboard />} />
         </Route>
 
+
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/lawyerlogin" element={<LawyerLogin />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
       </Routes>
