@@ -8,7 +8,7 @@ import {
     Instagram,
     ArrowUpRight,
 } from "lucide-react";
-import { Link } from "react-router-dom"; // ✅ Correct import
+import { Link } from "react-router-dom";
 
 export default function Navbar() {
     return (

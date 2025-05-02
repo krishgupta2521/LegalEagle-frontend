@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { Link } from "react-router-dom";
 
 const LawyerRegister = () => {
     const eyeIconRef = useRef();
@@ -128,12 +129,14 @@ const LawyerRegister = () => {
                     <input name="confirmpassword" placeholder="Confirm Password" type="password" value={form.confirmpassword} onChange={handleChange}
                         className='w-full p-3 mb-6 border border-blue-900 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-700' />
 
-                    <button
-                        onClick={handleSubmit}
-                        className='w-full mt-4 bg-[#0B0B5C] text-white font-bold p-3 rounded-full hover:bg-purple-800 transition duration-200'
-                    >
-                        Register
-                    </button>
+                    <Link to="/dashboard">
+                        <button
+                            onClick={handleSubmit}
+                            className='w-full mt-4 bg-[#0B0B5C] text-white font-bold p-3 rounded-full hover:bg-purple-800 transition duration-200'
+                        >
+                            Register
+                        </button>
+                    </Link>
                 </div>
             </div>
 

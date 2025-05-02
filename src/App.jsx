@@ -6,6 +6,7 @@ import Lawyer from "./Lawyer";
 import Chat from "./Chat";
 import Login from "./Login";
 import Signup from "./Signup"
+import Dashboard from "./Dashboard";
 
 export default function App() {
   return (
@@ -15,6 +16,7 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/lawyer" element={<Lawyer />} />
           <Route path="/chat" element={<Chat />} />
+          <Route path="/dashboard" element={<Dashboard />} />
         </Route>
 
         <Route path="/login" element={<Login />} />
