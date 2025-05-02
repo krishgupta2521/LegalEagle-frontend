@@ -6,6 +6,7 @@ import Lawyer from "./Lawyer";
 import Chat from "./Chat";
 import Login from "./Login";
 import Signup from "./Signup";
+import Dashboard from "./Dashboard";
 import { AuthProvider, useAuth } from "./utils/authContext";
 
 const ProtectedRoute = ({ children }) => {
@@ -28,16 +29,16 @@ export default function App() {
       <Router>
         <Routes>
           <Route element={<Layout />}>
+{/* public rotue */}
+
             <Route path="/" element={<Home />} />
             <Route path="/lawyer" element={<Lawyer />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-
-            <Route path="/chat" element={
-              <ProtectedRoute>
-                <Chat />
-                
-              </ProtectedRoute>
-            } />
+            
+            {/* protected route */}
+            <Route element={<ProtectedRoute><React.Fragment /></ProtectedRoute>}>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/chat" element={<Chat />} />
+            </Route>
           </Route>
 
           <Route path="/login" element={<Login />} />
