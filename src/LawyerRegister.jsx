@@ -142,12 +142,12 @@ const LawyerRegister = () => {
                         <p
                             className="text-blue-700 cursor-pointer hover:underline"
                         >
-                            <Link to="/signup"> Sign Up</Link>
+                            <Link to="/signup"> Log In</Link>
                         </p>
                         <p
                             s className="text-green-700 cursor-pointer hover:underline"
                         >
-                            <Link to="/login"> LogIn as Client</Link>
+                            <Link to="/clientregister"> Register as a Client</Link>
                         </p>
                     </div>
                 </div>

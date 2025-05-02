@@ -4,8 +4,8 @@ import Layout from "./Layout";
 import Home from "./Home";
 import Lawyer from "./Lawyer";
 import Chat from "./Chat";
-import Login from "./Login";
-import LawyerLogin from "./LawyerLogin"
+import ClientRegister from "./Clientregister";
+import LawyerRegister from "./LawyerRegister"
 import Dashboard from "./Dashboard";
 import Signup from "./Signup";
 
@@ -21,8 +21,8 @@ export default function App() {
 
 
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/lawyerlogin" element={<LawyerLogin />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/lawyerregister" element={<LawyerRegister />} />
+        <Route path="/clientregister" element={<ClientRegister />} />
         <Route path="/signup" element={<Signup />} />
       </Routes>
     </Router>

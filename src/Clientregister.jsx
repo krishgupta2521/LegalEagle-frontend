@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Link } from "react-router-dom";
 
-const Signup = () => {
+const ClientRegister = () => {
     const ref = useRef();
     const passwordRef = useRef();
     const [form, setForm] = useState({ email: "", username: "", password: "", confirmpassword: "" });
@@ -113,12 +113,12 @@ const Signup = () => {
                         <p
                             className="text-blue-700 cursor-pointer hover:underline"
                         >
-                            <Link to="/signup"> Sign Up</Link>
+                            <Link to="/signup">Log In</Link>
                         </p>
                         <p
                             s className="text-green-700 cursor-pointer hover:underline"
                         >
-                            <Link to="/login"> LogIn as Lawyer</Link>
+                            <Link to="/lawyerlogin"> Register as a Lawyer</Link>
                         </p>
                     </div>
                 </div>
@@ -132,4 +132,4 @@ const Signup = () => {
     );
 };
 
-export default Signup;
+export default ClientRegister;
