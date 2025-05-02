@@ -1,37 +1,34 @@
-import React, { useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { registerLawyer } from './utils/api';
+import React, { useRef, useState, useEffect } from 'react';
+import { Link, useNavigate } from "react-router-dom";
+import { loginUser } from './utils/api';
+import { useAuth } from './utils/authContext';
 
-const LawyerRegister = () => {
-    const navigate = useNavigate();
+const SignIn = () => {
     const eyeIconRef = useRef();
     const passwordInputRef = useRef();
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
+    const navigate = useNavigate();
+    const { user, login } = useAuth();
+
     const [form, setForm] = useState({
-        fullname: "",
         email: "",
-        phone: "",
-        license: "",
-        specialization: "",
-        experience: "",
-        pricePerSession: "",
-        username: "",
-        password: "",
-        confirmpassword: ""
+        password: ""
     });
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
+
+    // Redirect if already logged in
+    useEffect(() => {
+        if (user) {
+            if (user.role === 'lawyer') {
+                navigate('/dashboard');
+            } else {
+                navigate('/lawyer');
+            }
+        }
+    }, [user, navigate]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-
-        if (name === "experience" && Number(value) < 0) {
-            return; 
-        }
-
-        if (name === "pricePerSession" && Number(value) < 0) {
-            return; 
-        }
-
         setForm({ ...form, [name]: value });
     };
 
@@ -46,50 +43,34 @@ const LawyerRegister = () => {
     };
 
     const handleSubmit = async () => {
-        const {
-            fullname, email, phone, license, specialization, experience,
-            pricePerSession, username, password, confirmpassword
-        } = form;
-
-        if (!fullname || !email || !phone || !license || !specialization || !experience || !pricePerSession || !username || !password || !confirmpassword) {
-            setError("Please fill all fields.");
-            return;
-        }
-
-        if (!email.includes("@")) {
-            setError("Enter a valid email address.");
-            return;
-        }
-
-        if (password !== confirmpassword) {
-            setError("Passwords do not match.");
-            return;
-        }
-
         try {
+            setError("");
             setLoading(true);
-            setError(null);
             
-            const lawyerData = {
-                name: fullname,
-                email,
-                phone,
-                license,
-                specialization,
-                experience: Number(experience),
-                pricePerSession: Number(pricePerSession),
-                username,
-                password,
-            };
-            
-            const response = await registerLawyer(lawyerData);
-            
-            if (response.success) {
-                alert("Lawyer Registered Successfully!");
-                navigate('/login'); 
+            const { email, password } = form;
+
+            if (!email || !password) {
+                setError("Please fill all fields");
+                return;
             }
-        } catch (err) {
-            setError(err.message || "Registration failed. Please try again.");
+
+            if (!email.includes("@")) {
+                setError("Enter a valid email address");
+                return;
+            }
+
+            const userData = await loginUser({ email, password });
+            login(userData);
+            
+            // Redirect based on user role
+            if (userData.role === 'lawyer') {
+                navigate('/dashboard');
+            } else {
+                navigate('/lawyer');
+            }
+            
+        } catch (error) {
+            setError(error.message || "Login failed. Please check your credentials.");
         } finally {
             setLoading(false);
         }
@@ -99,32 +80,22 @@ const LawyerRegister = () => {
         <div className="flex min-h-screen w-full">
             <div className="w-1/2 flex justify-center items-center p-10">
                 <div className="w-96 text-center">
-                    <h2 className="text-5xl font-bold mb-10">Lawyer Registration</h2>
+                    <h2 className="text-5xl font-bold mb-10">Log In</h2>
                     
                     {error && (
-                        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg">
+                        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mb-4">
                             {error}
                         </div>
                     )}
 
-                    <input name="fullname" placeholder="Full Name" type="text" value={form.fullname} onChange={handleChange}
-                        className='w-full p-3 mb-4 border border-blue-900 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-700' />
-                    <input name="email" placeholder="Email" type="email" value={form.email} onChange={handleChange}
-                        className='w-full p-3 mb-4 border border-blue-900 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-700' />
-                    <input name="phone" placeholder="Phone Number" type="tel" value={form.phone} onChange={handleChange}
-                        className='w-full p-3 mb-4 border border-blue-900 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-700' />
-
-                    <input name="license" placeholder="License Number" type="text" value={form.license} onChange={handleChange}
-                        className='w-full p-3 mb-4 border border-blue-900 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-700' />
-                    <input name="specialization" placeholder="Specialization (e.g. Criminal Law)" type="text" value={form.specialization} onChange={handleChange}
-                        className='w-full p-3 mb-4 border border-blue-900 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-700' />
-                    <input name="experience" placeholder="Years of Experience" type="number" value={form.experience} onChange={handleChange}
-                        className='w-full p-3 mb-4 border border-blue-900 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-700' />
-                    <input name="pricePerSession" placeholder="Price Per Session (₹)" type="number" value={form.pricePerSession} onChange={handleChange}
-                        className='w-full p-3 mb-4 border border-blue-900 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-700' />
-
-                    <input name="username" placeholder="Username" type="text" value={form.username} onChange={handleChange}
-                        className='w-full p-3 mb-4 border border-blue-900 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-700' />
+                    <input
+                        name="email"
+                        placeholder="Email"
+                        type="email"
+                        value={form.email}
+                        onChange={handleChange}
+                        className='w-full p-3 mb-4 border border-blue-900 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-700'
+                    />
 
                     <div className="relative w-full">
                         <input
@@ -141,22 +112,37 @@ const LawyerRegister = () => {
                         </span>
                     </div>
 
-                    <input name="confirmpassword" placeholder="Confirm Password" type="password" value={form.confirmpassword} onChange={handleChange}
-                        className='w-full p-3 mb-6 border border-blue-900 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-700' />
-
                     <button
                         onClick={handleSubmit}
                         disabled={loading}
-                        className='w-full mt-4 bg-[#0B0B5C] text-white font-bold p-3 rounded-full hover:bg-purple-800 transition duration-200 disabled:bg-gray-400'
+                        className={`w-full mt-4 bg-[#0B0B5C] text-white font-bold p-3 rounded-full hover:bg-purple-800 transition duration-200 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
                     >
-                        {loading ? 'Registering...' : 'Register'}
+                        {loading ? 'Logging in...' : 'Log In'}
                     </button>
+
+                    <div className="mt-6 text-center">
+                        <p className="mb-2">
+                            Don't have an account?{' '}
+                            <Link to="/clientregister" className="text-blue-700 hover:underline">
+                                Register as Client
+                            </Link>
+                        </p>
+                        <p>
+                            Are you a lawyer?{' '}
+                            <Link to="/lawyerregister" className="text-green-700 hover:underline">
+                                Register as Lawyer
+                            </Link>
+                        </p>
+                    </div>
                 </div>
             </div>
 
-            <div className="w-1/2 h-100vh bg-cover bg-center border-2 border-solid" style={{ backgroundImage: "url('/login.webp')" }}></div>
+            <div
+                className="w-1/2 h-screen bg-cover bg-center"
+                style={{ backgroundImage: "url('/login.webp')" }}
+            ></div>
         </div>
     );
 };
 
-export default LawyerRegister;
+export default SignIn;
