@@ -30,9 +30,12 @@ export default function App() {
           <Route element={<Layout />}>
             <Route path="/" element={<Home />} />
             <Route path="/lawyer" element={<Lawyer />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+
             <Route path="/chat" element={
               <ProtectedRoute>
                 <Chat />
+                
               </ProtectedRoute>
             } />
           </Route>
