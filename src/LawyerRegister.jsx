@@ -1,6 +1,7 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { v4 as uuidv4 } from 'uuid';
-import { Link } from "react-router-dom"
+import React, { useRef, useState } from 'react';
+import { Link, useNavigate } from "react-router-dom";
+import { registerLawyer } from "./utils/api";
+import { useAuth } from './utils/authContext';
 
 const LawyerRegister = () => {
     const eyeIconRef = useRef();
@@ -16,15 +17,10 @@ const LawyerRegister = () => {
         password: "",
         confirmpassword: ""
     });
-
-    const [lawyerList, setLawyerList] = useState([]);
-
-    useEffect(() => {
-        const savedLawyers = localStorage.getItem("lawyers");
-        if (savedLawyers) {
-            setLawyerList(JSON.parse(savedLawyers));
-        }
-    }, []);
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
+    const { login } = useAuth();
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -46,46 +42,52 @@ const LawyerRegister = () => {
         }
     };
 
-    const handleSubmit = () => {
-        const {
-            fullname, email, phone, license, specialization, experience,
-            username, password, confirmpassword
-        } = form;
+    const handleSubmit = async () => {
+        try {
+            setError("");
+            setLoading(true);
+            
+            const {
+                fullname, email, phone, license, specialization, experience,
+                username, password, confirmpassword
+            } = form;
 
-        if (!fullname || !email || !phone || !license || !specialization || !experience || !username || !password || !confirmpassword) {
-            alert("Please fill all fields.");
-            return;
+            if (!fullname || !email || !phone || !license || !specialization || !experience || !username || !password || !confirmpassword) {
+                setError("Please fill all required fields");
+                return;
+            }
+
+            if (!email.includes("@")) {
+                setError("Please enter a valid email address");
+                return;
+            }
+
+            if (password !== confirmpassword) {
+                setError("Passwords do not match");
+                return;
+            }
+
+            const lawyerData = {
+                name: fullname,
+                email,
+                phone,
+                license,
+                specialization,
+                experience: Number(experience),
+                username,
+                password,
+                pricePerSession: 500 // Default price
+            };
+
+            const response = await registerLawyer(lawyerData);
+            login(response);
+            navigate('/dashboard');
+            
+        } catch (error) {
+            setError(error.message || "Registration failed. Please try again.");
+        } finally {
+            setLoading(false);
         }
-
-        if (!email.includes("@")) {
-            alert("Enter a valid email address.");
-            return;
-        }
-
-        if (password !== confirmpassword) {
-            alert("Passwords do not match.");
-            return;
-        }
-
-        const newLawyer = { ...form, id: uuidv4() };
-        const updatedLawyers = [...lawyerList, newLawyer];
-
-        setLawyerList(updatedLawyers);
-        localStorage.setItem("lawyers", JSON.stringify(updatedLawyers));
-
-        alert("Lawyer Registered Successfully!");
-
-        setForm({
-            fullname: "",
-            email: "",
-            phone: "",
-            license: "",
-            specialization: "",
-            experience: "",
-            username: "",
-            password: "",
-            confirmpassword: ""
-        });
     };
 
     return (
@@ -93,6 +95,12 @@ const LawyerRegister = () => {
             <div className="w-1/2 flex justify-center items-center p-10">
                 <div className="w-96 text-center">
                     <h2 className="text-5xl font-bold mb-10">Lawyer Registration</h2>
+                    
+                    {error && (
+                        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mb-4">
+                            {error}
+                        </div>
+                    )}
 
                     <input name="fullname" placeholder="Full Name" type="text" value={form.fullname} onChange={handleChange}
                         className='w-full p-3 mb-4 border border-blue-900 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-700' />
@@ -129,32 +137,27 @@ const LawyerRegister = () => {
                     <input name="confirmpassword" placeholder="Confirm Password" type="password" value={form.confirmpassword} onChange={handleChange}
                         className='w-full p-3 mb-6 border border-blue-900 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-700' />
 
-                    <Link to="/dashboard">
-                        <button
-                            onClick={handleSubmit}
-                            className='w-full mt-4 bg-[#0B0B5C] text-white font-bold p-3 rounded-full hover:bg-purple-800 transition duration-200'
-                        >
-                            Register
-                        </button>
-                    </Link>
+                    <button
+                        onClick={handleSubmit}
+                        disabled={loading}
+                        className={`w-full mt-4 bg-[#0B0B5C] text-white font-bold p-3 rounded-full hover:bg-purple-800 transition duration-200 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                    >
+                        {loading ? 'Registering...' : 'Register'}
+                    </button>
 
                     <div className="mt-6 flex space-x-6 justify-center text-[1.2rem]">
-                        <p
-                            className="text-blue-700 cursor-pointer hover:underline"
-                        >
-                            <Link to="/signup"> Log In</Link>
+                        <p className="text-blue-700 cursor-pointer hover:underline">
+                            <Link to="/login">Log In</Link>
                         </p>
-                        <p
-                            s className="text-green-700 cursor-pointer hover:underline"
-                        >
-                            <Link to="/clientregister"> Register as a Client</Link>
+                        <p className="text-green-700 cursor-pointer hover:underline">
+                            <Link to="/clientregister">Register as a Client</Link>
                         </p>
                     </div>
                 </div>
             </div>
 
             <div className="w-1/2 h-100vh bg-cover bg-center border-2 border-solid" style={{ backgroundImage: "url('/login.webp')" }}></div>
-        </div >
+        </div>
     );
 };
 
