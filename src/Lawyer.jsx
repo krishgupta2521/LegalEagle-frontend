@@ -13,6 +13,7 @@ export default function LawyerPage() {
             try {
                 setIsLoading(true);
                 const data = await fetchLawyers();
+                console.log("API response:", data); // Debug log
                 
                 if (!data || data.length === 0) {
                     setError('No lawyer data available at the moment.');
@@ -22,17 +23,26 @@ export default function LawyerPage() {
                 }
                 
                 const transformedData = data.map(lawyer => ({
-                    name: lawyer.name,
-                    experience: `${lawyer.experience} yrs`,
+                    id: lawyer._id,
+                    name: lawyer.name || 'Unknown Lawyer',
+                    experience: lawyer.experience ? `${lawyer.experience} yrs` : 'Not specified',
+                    specialization: lawyer.specialization || 'General Practice',
+                    pricePerSession: lawyer.pricePerSession || 0,
                     location: lawyer.location || 'Not specified',
-                    image: lawyer.image || 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fHBvdHJhaXR8ZW58MHx8MHx8fDA%3D',
+                    image: lawyer.profilePicture || 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fHBvdHJhaXR8ZW58MHx8MHx8fDA%3D',
                     expertise: lawyer.specialization ? [lawyer.specialization] : ['General Practice'],
-                    rating: lawyer.rating || 4.0,
-                    reviews: lawyer.reviews || '50+ ratings'
+                    rating: (lawyer.rating && lawyer.rating.average) || 4.0,
+                    reviews: (lawyer.rating && lawyer.rating.count) ? `${lawyer.rating.count}+ ratings` : '50+ ratings',
+                    email: lawyer.email || '',
+                    phone: lawyer.phone || '',
                 }));
                 
+                console.log("Transformed data:", transformedData); // Debug log
+                
                 setLawyers(transformedData);
-                setSelected(transformedData[0]);
+                if (transformedData.length > 0) {
+                    setSelected(transformedData[0]);
+                }
                 setError(null);
             } catch (err) {
                 console.error('Error fetching lawyers:', err);
@@ -49,6 +59,44 @@ export default function LawyerPage() {
 
     const handleSearch = () => {
         console.log("Search functionality to be implemented");
+    };
+
+    const renderLawyerGrid = () => {
+        if (lawyers.length === 0) {
+            return (
+                <div className="text-center py-10 text-gray-500">
+                    No lawyers available at this time.
+                </div>
+            );
+        }
+        
+        return (
+            <div className="flex gap-6 overflow-x-auto pb-4">
+                {lawyers.map((lawyer, index) => (
+                    <div
+                        key={lawyer.id || index}
+                        className="bg-white text-black rounded-xl p-4 w-60 min-w-60 cursor-pointer shadow hover:shadow-lg"
+                        onClick={() => setSelected(lawyer)}
+                    >
+                        <div className="h-40 bg-gray-200 rounded-lg mb-3">
+                            {lawyer.image ? (
+                                <img src={lawyer.image} alt={lawyer.name} className="h-full w-full object-cover rounded-lg" />
+                            ) : (
+                                <div className="h-full w-full bg-gray-400 flex items-center justify-center text-white rounded-lg">
+                                    No Image
+                                </div>
+                            )}
+                        </div>
+                        <h4 className="font-semibold text-center">{lawyer.name}</h4>
+                        <p className="text-sm text-center text-gray-600">{lawyer.specialization}</p>
+                        <div className="flex justify-between items-center mt-2">
+                            <span className="text-sm">Exp: {lawyer.experience}</span>
+                            <span className="text-sm font-semibold text-[#0B0B5C]">₹{lawyer.pricePerSession}/session</span>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        );
     };
 
     return (
@@ -83,37 +131,13 @@ export default function LawyerPage() {
                     <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative my-6" role="alert">
                         <span className="block sm:inline">{error}</span>
                     </div>
-                ) : lawyers.length === 0 ? (
-                    <div className="text-center py-10 text-gray-500">
-                        No lawyers available at this time.
-                    </div>
                 ) : (
-                    <div className="flex gap-6 overflow-x-auto pb-4">
-                        {lawyers.map((lawyer, index) => (
-                            <div
-                                key={index}
-                                className="bg-white text-black rounded-xl p-4 w-52 cursor-pointer shadow hover:shadow-lg"
-                                onClick={() => setSelected(lawyer)}
-                            >
-                                <div className="h-40 bg-gray-200 rounded-lg mb-3">
-                                    {lawyer.image ? (
-                                        <img src={lawyer.image} alt={lawyer.name} className="h-full w-full object-cover rounded-lg" />
-                                    ) : (
-                                        <div className="h-full w-full bg-gray-400 flex items-center justify-center text-white rounded-lg">
-                                            No Image
-                                        </div>
-                                    )}
-                                </div>
-                                <h4 className="font-semibold text-center">{lawyer.name}</h4>
-                                <p className="text-center">Exp: {lawyer.experience}</p>
-                            </div>
-                        ))}
-                    </div>
+                    renderLawyerGrid()
                 )}
             </div>
 
             {/* Second component: Selected lawyer details section */}
-            <div className="mt-16 mx-10">
+            <div className="mt-16 mx-10 mb-16">
                 {isLoading ? (
                     <div className="flex justify-center items-center py-10">
                         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#0B0B5C]"></div>
@@ -124,24 +148,25 @@ export default function LawyerPage() {
                     </div>
                 ) : error ? (
                     <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-                        <span className="block sm:inline">Cannot display lawyer details:</span>
+                        <span className="block sm:inline">Cannot display lawyer details: {error}</span>
                     </div>
                 ) : selected && (
-                    <div className="bg-white p-8 rounded-xl text-black">
+                    <div className="bg-white p-8 rounded-xl text-black shadow-md">
                         <div className="flex items-center gap-6">
-                            <div className="h-28 w-28 rounded-full bg-gray-300">
+                            <div className="h-28 w-28 rounded-full bg-gray-300 overflow-hidden">
                                 {selected.image ? (
-                                    <img src={selected.image} alt={selected.name} className="h-full w-full object-cover rounded-full" />
+                                    <img src={selected.image} alt={selected.name} className="h-full w-full object-cover" />
                                 ) : (
-                                    <div className="flex items-center justify-center h-full w-full bg-gray-400 rounded-full text-white">
+                                    <div className="flex items-center justify-center h-full w-full bg-gray-400 text-white">
                                         No Image
                                     </div>
                                 )}
                             </div>
                             <div>
-                                <h2 className="text-xl font-bold">Advocate {selected.name.split(' ')[1]} {selected.name.split(' ')[2]}</h2>
-                                <p className="text-sm">Location - {selected.location || 'Not specified'}</p>
+                                <h2 className="text-xl font-bold">Advocate {selected.name}</h2>
+                                <p className="text-sm">Location - {selected.location}</p>
                                 <p className="text-sm">Experience - {selected.experience}</p>
+                                <p className="text-sm font-medium mt-1">Price - <span className="text-[#0B0B5C] font-semibold">₹{selected.pricePerSession}</span> per session</p>
                                 <div className="flex items-center gap-2 mt-2">
                                     <span className="bg-[#0B0B5C] text-white text-xs px-2 py-1 rounded">{selected.rating} ★</span>
                                     <span className="text-xs text-gray-600">{selected.reviews}</span>
@@ -157,18 +182,26 @@ export default function LawyerPage() {
                         </div>
 
                         <div className="flex flex-wrap gap-4 mt-6">
-                            {selected.expertise.map((item, i) => (
+                            {selected.expertise && selected.expertise.map((item, i) => (
                                 <span key={i} className="px-4 py-2 bg-white border border-[#0B0B5C] text-[#0B0B5C] rounded-full text-sm">
                                     {item}
                                 </span>
                             ))}
                         </div>
 
+                        <div className="mt-6">
+                            <h3 className="text-md font-semibold">Contact Information</h3>
+                            {selected.email && <p className="text-sm mt-1">Email: {selected.email}</p>}
+                            {selected.phone && <p className="text-sm mt-1">Phone: {selected.phone}</p>}
+                        </div>
+
                         <div className="mt-10 text-center">
-                            <Link to={{ pathname: '/chat', state: { name: selected.name, image: selected.image } }}>
-                                <button className="bg-[#0B0B5C] text-white px-8 py-3 rounded-full font-semibold text-lg shadow hover:shadow-lg">
-                                    Chat Now
-                                </button>
+                            <Link 
+                                to="/chat" 
+                                state={{ lawyerId: selected.id, name: selected.name, image: selected.image }}
+                                className="bg-[#0B0B5C] text-white px-8 py-3 rounded-full font-semibold text-lg shadow hover:shadow-lg inline-block"
+                            >
+                                Chat Now
                             </Link>
                         </div>
                     </div>
