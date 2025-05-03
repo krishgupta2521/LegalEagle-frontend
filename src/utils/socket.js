@@ -1,83 +1,128 @@
-import io from 'socket.io-client';
+import { io } from 'socket.io-client';
 
-let socket;
+let socket = null;
+
+// Hardcoded lawyer ID for fallback authentication
+const DEFAULT_LAWYER_ID = '681587a83959e1fcc560dc0a';
 
 export const initSocket = () => {
+  console.log("Initializing socket connection");
+  const serverUrl = window.location.hostname === 'localhost' 
+    ? 'http://localhost:5000'
+    : `${window.location.protocol}//${window.location.hostname}`;
+  
   if (!socket) {
-    socket = io('/api', {
-      path: '/socket.io',
-      transports: ['websocket', 'polling'],
+    socket = io(serverUrl, {
+      transports: ['websocket'],
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000
     });
-
+    
     socket.on('connect', () => {
-      console.log('Connected to socket server');
+      console.log('Socket connected successfully with ID:', socket.id);
     });
-
+    
+    socket.on('connect_error', (error) => {
+      console.error('Socket connection error:', error);
+    });
+    
     socket.on('error', (error) => {
       console.error('Socket error:', error);
     });
-
-    socket.on('disconnect', () => {
-      console.log('Disconnected from socket server');
-    });
   }
+  
   return socket;
 };
 
 export const authenticateSocket = (userId, role) => {
-  const socketInstance = initSocket();
-  socketInstance.emit('authenticate', { userId, role });
+  if (!socket) {
+    console.warn("Socket not initialized, cannot authenticate");
+    return;
+  }
+  
+  if (!userId) {
+    console.error("Missing userId for socket authentication");
+    return;
+  }
+  
+  // Get authentication token from localStorage
+  const token = localStorage.getItem('authToken');
+  if (!token) {
+    console.error("No authentication token found in localStorage");
+    return;
+  }
+  
+  console.log(`Authenticating socket with token and user ${userId}, role ${role}`);
+  
+  // Remove previous listeners to avoid duplicates
+  socket.off('authError');
+  socket.off('authenticated');
+  
+  // Set up listeners for authentication events
+  socket.on('authError', (error) => {
+    console.error('Socket authentication error:', error);
+  });
+  
+  socket.on('authenticated', () => {
+    console.log('Socket authenticated successfully');
+  });
+  
+  // Send authentication data to server
+  socket.emit('authenticate', { userId, role, token });
 };
 
-export const joinChatRoom = (chatId, userId, role) => {
-  const socketInstance = initSocket();
-  socketInstance.emit('joinRoom', { chatId, userId, role });
+export const joinChatRoom = (chatId) => {
+  if (!socket) {
+    console.warn("Socket not initialized, cannot join room");
+    return;
+  }
+  
+  console.log(`Joining chat room: ${chatId}`);
+  socket.emit('joinRoom', { chatId });
 };
 
 export const sendMessage = (chatId, sender, text, userId, lawyerId) => {
-  const socketInstance = initSocket();
-  socketInstance.emit('sendMessage', { chatId, sender, text, userId, lawyerId });
-};
-
-export const sendTypingStatus = (chatId, user) => {
-  const socketInstance = initSocket();
-  socketInstance.emit('typing', { chatId, user });
-};
-
-export const stopTypingStatus = (chatId) => {
-  const socketInstance = initSocket();
-  socketInstance.emit('stopTyping', { chatId });
+  if (!socket) {
+    console.warn("Socket not initialized, cannot send message");
+    return;
+  }
+  
+  console.log(`Sending message to chat ${chatId} as ${sender}`);
+  socket.emit('sendMessage', { chatId, sender, text, userId, lawyerId });
 };
 
 export const onReceiveMessage = (callback) => {
-  const socketInstance = initSocket();
-  socketInstance.on('receiveMessage', (message) => {
-    callback(message);
-  });
-};
-
-export const onUserTyping = (callback) => {
-  const socketInstance = initSocket();
-  socketInstance.on('userTyping', ({ user }) => {
-    callback(user);
-  });
-};
-
-export const onUserStoppedTyping = (callback) => {
-  const socketInstance = initSocket();
-  socketInstance.on('userStoppedTyping', callback);
-};
-
-export const onNewMessageNotification = (callback) => {
-  const socketInstance = initSocket();
-  socketInstance.on('newMessageNotification', (data) => {
-    callback(data);
-  });
+  if (!socket) {
+    console.warn("Socket not initialized, cannot set up listener");
+    return;
+  }
+  
+  socket.on('receiveMessage', callback);
 };
 
 export const disconnectSocket = () => {
   if (socket) {
+    console.log("Disconnecting socket");
+    socket.off('authenticated');
+    socket.off('authError');
+    socket.off('receiveMessage');
     socket.disconnect();
     socket = null;
   }
+};
+
+export const startTyping = (chatId) => {
+  if (!socket) return;
+  socket.emit('typing', { chatId });
+};
+
+export const stopTyping = (chatId) => {
+  if (!socket) return;
+  socket.emit('stopTyping', { chatId });
+};
+
+export const markChatAsRead = (chatId) => {
+  if (!socket) return;
+  socket.emit('markAsRead', { chatId });
 };
