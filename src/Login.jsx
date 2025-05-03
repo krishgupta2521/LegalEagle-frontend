@@ -41,22 +41,34 @@ const Login = () => {
             setLoading(true);
             setError(null);
             
+            // Include explicit parameter to force lawyer collection check
             const response = await loginUser({
                 email: form.email,
-                password: form.password
+                password: form.password,
+                checkBoth: true,
+                isLawyerLogin: true
             });
             
-            // Update auth context
+            // Update auth context with the full response
             login(response);
             
-            // Successful login, redirect based on role
+            // Log the authentication info for debugging
+            console.log("Authentication successful:", {
+                token: response.token ? "Present" : "Missing",
+                userId: response.userId,
+                role: response.role,
+                source: response.source || 'user',
+            });
+            
+            // Successful login, redirect based on role and source
             if (response.role === 'lawyer') {
                 navigate('/dashboard');
             } else {
-                navigate('/dashboard');
+                navigate('/lawyer');
             }
             
         } catch (err) {
+            console.error("Login error details:", err);
             setError(err.message || "Login failed. Please check your credentials.");
         } finally {
             setLoading(false);

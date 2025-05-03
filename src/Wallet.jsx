@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { CreditCard, Wallet as WalletIcon, RefreshCcw, DollarSign } from 'lucide-react';
-import { fetchWalletBalance, addMoneyToWallet } from './utils/api';
+import { WalletIcon, RefreshCcw, CreditCard, DollarSign } from 'lucide-react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { fetchWalletBalance, addMoneyToWallet, getTransactions } from './utils/api';
 import { useAuth } from './utils/authContext';
 import { useNavigate } from 'react-router-dom';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
 const Wallet = () => {
     const [balance, setBalance] = useState(0);
     const [amount, setAmount] = useState('');
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [transactionLoading, setTransactionLoading] = useState(false);
+    const [transactions, setTransactions] = useState([]);
     const { user } = useAuth();
     const navigate = useNavigate();
 
@@ -19,13 +20,13 @@ const Wallet = () => {
             navigate('/login');
             return;
         }
-        
+
         fetchBalance();
+        fetchTransactionHistory();
     }, [user, navigate]);
 
     const fetchBalance = async () => {
         try {
-            setLoading(true);
             const data = await fetchWalletBalance();
             setBalance(data.balance);
         } catch (error) {
@@ -33,6 +34,15 @@ const Wallet = () => {
             console.error(error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchTransactionHistory = async () => {
+        try {
+            const data = await getTransactions();
+            setTransactions(data.transactions || []);
+        } catch (error) {
+            console.error('Failed to fetch transactions:', error);
         }
     };
 
@@ -46,6 +56,7 @@ const Wallet = () => {
             setTransactionLoading(true);
             await addMoneyToWallet(parseFloat(amount));
             await fetchBalance();
+            await fetchTransactionHistory();
             toast.success(`Successfully added ₹${amount} to your wallet`);
             setAmount('');
         } catch (error) {
@@ -64,19 +75,13 @@ const Wallet = () => {
         }).format(value);
     };
 
-    const transactions = [
-        { id: 1, type: 'deposit', amount: 1000, date: '2023-08-15', status: 'completed' },
-        { id: 2, type: 'payment', amount: 500, date: '2023-08-14', recipient: 'Adv. Rashmi Gupta', status: 'completed' },
-        { id: 3, type: 'deposit', amount: 2000, date: '2023-08-10', status: 'completed' }
-    ];
-
     return (
         <div className="min-h-screen bg-gray-50 p-6">
             <ToastContainer position="top-right" autoClose={3000} />
-            
+
             <div className="max-w-5xl mx-auto">
                 <h1 className="text-3xl font-bold text-[#0B0B5C] mb-8">Your Wallet</h1>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <div className="bg-white p-6 rounded-xl shadow col-span-2">
                         <div className="flex items-center justify-between mb-4">
@@ -84,30 +89,30 @@ const Wallet = () => {
                                 <WalletIcon className="mr-2 text-[#0B0B5C]" />
                                 Wallet Balance
                             </h2>
-                            <button 
-                                onClick={fetchBalance} 
+                            <button
+                                onClick={fetchBalance}
                                 className="text-gray-500 hover:text-[#0B0B5C]"
                                 disabled={loading}
                             >
                                 <RefreshCcw size={18} className={loading ? "animate-spin" : ""} />
                             </button>
                         </div>
-                        
+
                         <div className="text-4xl font-bold text-[#0B0B5C] mb-6">
                             {loading ? "Loading..." : formatCurrency(balance)}
                         </div>
-                        
+
                         <p className="text-gray-600 text-sm mb-4">
                             Add money to your wallet to book appointments and chat with lawyers.
                         </p>
                     </div>
-                    
+
                     <div className="bg-white p-6 rounded-xl shadow">
                         <h2 className="text-xl font-semibold mb-4 flex items-center">
                             <CreditCard className="mr-2 text-[#0B0B5C]" />
                             Add Money
                         </h2>
-                        
+
                         <div className="mb-4">
                             <label className="block text-gray-700 text-sm font-medium mb-2">
                                 Amount (₹)
@@ -126,7 +131,7 @@ const Wallet = () => {
                                 />
                             </div>
                         </div>
-                        
+
                         <button
                             onClick={handleAddMoney}
                             disabled={transactionLoading}
@@ -136,10 +141,10 @@ const Wallet = () => {
                         </button>
                     </div>
                 </div>
-                
+
                 <div className="bg-white p-6 rounded-xl shadow mb-6">
                     <h2 className="text-xl font-semibold mb-4">Recent Transactions</h2>
-                    
+
                     {transactions.length > 0 ? (
                         <div className="overflow-x-auto">
                             <table className="min-w-full divide-y divide-gray-200">

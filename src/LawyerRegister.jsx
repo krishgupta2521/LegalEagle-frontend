@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { Link, useNavigate } from "react-router-dom";
 import { registerLawyer } from "./utils/api";
 import { useAuth } from './utils/authContext';
+import { toast } from 'react-toastify';
 
 const LawyerRegister = () => {
     const eyeIconRef = useRef();
@@ -80,10 +81,24 @@ const LawyerRegister = () => {
             };
 
             const response = await registerLawyer(lawyerData);
-            login(response);
+            console.log("Lawyer registration successful:", response);
+            
+            // Store the important fields in localStorage for authContext
+            login({
+                id: response.lawyerId, // Store unique lawyer ID
+                lawyerId: response.lawyerId,
+                token: response.token,
+                role: response.role,
+                name: response.name,
+                email: response.email,
+                source: 'lawyer' // Add source to identify direct lawyer account
+            });
+            
+            toast.success("Registration successful! Redirecting to dashboard...");
             navigate('/dashboard');
             
         } catch (error) {
+            console.error("Registration error:", error);
             setError(error.message || "Registration failed. Please try again.");
         } finally {
             setLoading(false);

@@ -1,4 +1,4 @@
-const API_BASE_URL = '/api';
+const API_BASE_URL = 'http://localhost:5000/api'; // Use your actual backend server port
 
 export const fetchLawyers = async () => {
   try {
@@ -69,6 +69,7 @@ export const addMoneyToWallet = async (amount) => {
 
 export const registerLawyer = async (lawyerData) => {
   try {
+    const API_BASE_URL = 'http://localhost:5000/api';
     const response = await fetch(`${API_BASE_URL}/lawyer/register`, {
       method: 'POST',
       headers: {
@@ -83,15 +84,18 @@ export const registerLawyer = async (lawyerData) => {
     }
     
     const data = await response.json();
+    console.log("Lawyer registration response:", data);
     
-    // Store the authentication token if it exists in the response
+    // Store the authentication token if it exists
     if (data.token) {
       localStorage.setItem('authToken', data.token);
       localStorage.setItem('user', JSON.stringify({
         id: data.lawyerId,
+        lawyerId: data.lawyerId,
         name: lawyerData.name,
         email: lawyerData.email,
-        role: 'lawyer'
+        role: 'lawyer',
+        source: 'lawyer'
       }));
     }
     
@@ -139,50 +143,61 @@ export const register = async (userData) => {
 
 export const loginUser = async (credentials) => {
   try {
-    // First try to login with user credentials
-    let response = await fetch(`${API_BASE_URL}/auth/login`, {
+    // Always include checkBoth and isLawyerLogin parameters
+    const modifiedCredentials = {
+      ...credentials,
+      checkBoth: true,
+      isLawyerLogin: true
+    };
+    
+    console.log("Sending login request with credentials:", {
+      email: modifiedCredentials.email,
+      checkBoth: modifiedCredentials.checkBoth,
+      isLawyerLogin: modifiedCredentials.isLawyerLogin
+    });
+    
+    const response = await fetch(`${API_BASE_URL}/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(credentials)
+      body: JSON.stringify(modifiedCredentials)
     });
     
-    let data;
-    
     if (!response.ok) {
-      // If user login fails, try lawyer login
-      response = await fetch(`${API_BASE_URL}/lawyer/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(credentials)
-      });
+      const errorText = await response.text();
+      let errorData;
       
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP error! Status: ${response.status}`);
+      try {
+        errorData = JSON.parse(errorText);
+      } catch (e) {
+        throw new Error(`Login failed with status: ${response.status} - ${errorText}`);
       }
       
-      data = await response.json();
-    } else {
-      data = await response.json();
+      throw new Error(errorData.error || `HTTP error! Status: ${response.status}`);
     }
     
-    if (data.token) {
-      localStorage.setItem('authToken', data.token);
-      localStorage.setItem('user', JSON.stringify({
-        id: data.userId || data.lawyerId,
-        name: data.name,
-        email: data.email,
-        role: data.role
-      }));
-    }
+    const userData = await response.json();
+    console.log("Login success response:", userData);
     
-    return data;
+    // Store the authentication token and user data
+    localStorage.setItem('authToken', userData.token);
+    
+    // Ensure all necessary user data is included
+    const userToStore = {
+      id: userData.userId,
+      name: userData.name,
+      email: userData.email,
+      role: userData.role || 'lawyer',
+      source: userData.source || 'lawyer',
+      lawyerId: userData.lawyerId || userData.userId
+    };
+    
+    localStorage.setItem('user', JSON.stringify(userToStore));
+    
+    return userData;
   } catch (error) {
-    console.error("Error during login:", error);
+    console.error("Error logging in:", error);
     throw error;
   }
 };
@@ -212,7 +227,11 @@ export const logoutUser = async () => {
 
 export const getAuthHeaders = () => {
   const token = localStorage.getItem('authToken');
-  return token ? { 'Authorization': `Bearer ${token}` } : {};
+  if (!token) {
+    console.warn("No auth token found in localStorage");
+    return {};
+  }
+  return { 'Authorization': `Bearer ${token}` };
 };
 
 export const isAuthenticated = () => {
@@ -261,24 +280,45 @@ export const createChatRoom = async (lawyerId) => {
     const user = getCurrentUser();
     if (!user) throw new Error('User not authenticated');
     
+    console.log("Creating chat room for lawyer:", lawyerId, "as user:", user.id);
+    
+    // Get auth headers
+    const headers = getAuthHeaders();
+    
+    // Try to create the chat room
     const response = await fetch(`${API_BASE_URL}/chat`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        ...getAuthHeaders()
+        ...headers
       },
       body: JSON.stringify({
         userId: user.id,
-        lawyerId
+        lawyerId,
+        forceCreation: false // Don't bypass appointment check
       })
     });
     
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || `HTTP error! Status: ${response.status}`);
+      const responseText = await response.text();
+      let errorData;
+      
+      try {
+        errorData = JSON.parse(responseText);
+      } catch (e) {
+        throw new Error(`Failed to create chat room: ${response.status} - ${responseText}`);
+      }
+      
+      if (errorData.code === 'NO_APPOINTMENT') {
+        throw new Error('You must have a paid appointment with this lawyer to start a chat');
+      }
+      
+      throw new Error(errorData.error || `Failed to create chat room: ${response.status}`);
     }
     
-    return await response.json();
+    const chatData = await response.json();
+    console.log("Chat room created/retrieved successfully:", chatData._id);
+    return chatData;
   } catch (error) {
     console.error("Error creating chat room:", error);
     throw error;
@@ -287,6 +327,7 @@ export const createChatRoom = async (lawyerId) => {
 
 export const getChatHistory = async (chatId) => {
   try {
+    console.log("Fetching chat history for:", chatId);
     const response = await fetch(`${API_BASE_URL}/chat/${chatId}`, {
       headers: {
         ...getAuthHeaders()
@@ -294,11 +335,23 @@ export const getChatHistory = async (chatId) => {
     });
     
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || `HTTP error! Status: ${response.status}`);
+      const responseText = await response.text();
+      let errorMessage;
+      
+      try {
+        const errorData = JSON.parse(responseText);
+        errorMessage = errorData.error || `HTTP error! Status: ${response.status}`;
+      } catch (e) {
+        errorMessage = `Failed to fetch chat history: ${response.status} - ${responseText}`;
+      }
+      
+      console.error("Chat history error:", errorMessage);
+      throw new Error(errorMessage);
     }
     
-    return await response.json();
+    const data = await response.json();
+    console.log("Retrieved chat history with messages:", data.messages?.length || 0);
+    return data;
   } catch (error) {
     console.error("Error fetching chat history:", error);
     throw error;
@@ -310,10 +363,88 @@ export const getUserChats = async () => {
     const user = getCurrentUser();
     if (!user) throw new Error('User not authenticated');
     
+    console.log("Fetching chats for user:", user.id);
+    
+    // Use direct URL to avoid routing conflicts
+    const API_BASE_URL = 'http://localhost:5000/api';
     const response = await fetch(`${API_BASE_URL}/chat/user/${user.id}`, {
       headers: {
         ...getAuthHeaders()
       }
+    });
+    
+    if (!response.ok) {
+      // If 404, just return empty array instead of throwing error
+      if (response.status === 404) {
+        console.log('No chats found for user, returning empty array');
+        return [];
+      }
+      
+      const errorText = await response.text();
+      console.error(`Failed to fetch user chats: ${response.status}`, errorText);
+      
+      let errorData;
+      try {
+        errorData = JSON.parse(errorText);
+      } catch (e) {
+        throw new Error(`Failed to fetch user chats: ${response.status} - ${errorText}`);
+      }
+      
+      throw new Error(errorData.error || `Failed to fetch user chats: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log(`Successfully retrieved ${data.length} chats for user ${user.id}`);
+    return data;
+  } catch (error) {
+    console.error("Error fetching user chats:", error);
+    throw error;
+  }
+};
+
+export const getLawyerChats = async (lawyerId) => {
+  try {
+    console.log(`Fetching chats for lawyer: ${lawyerId}`);
+    
+    // Use direct URL to avoid routing conflicts
+    const API_BASE_URL = 'http://localhost:5000/api';
+    const response = await fetch(`${API_BASE_URL}/chat/lawyer/${lawyerId}`, {
+      headers: {
+        ...getAuthHeaders()
+      }
+    });
+    
+    if (!response.ok) {
+      // If 404, just return empty array instead of throwing error
+      if (response.status === 404) {
+        console.log('No chats found for lawyer, returning empty array');
+        return [];
+      }
+      
+      const errorData = await response.json().catch(() => ({ 
+        error: `HTTP error! Status: ${response.status}` 
+      }));
+      throw new Error(errorData.error || `Failed to fetch lawyer chats: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log(`Successfully retrieved ${data.length} chats for lawyer ${lawyerId}`);
+    return data;
+  } catch (error) {
+    console.error("Error fetching lawyer chats:", error);
+    throw error;
+  }
+};
+
+export const sendMessageToChat = async (chatId, text, sender) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/chat/${chatId}/message`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders()
+      },
+      body: JSON.stringify({ text, sender })
     });
     
     if (!response.ok) {
@@ -323,7 +454,52 @@ export const getUserChats = async () => {
     
     return await response.json();
   } catch (error) {
-    console.error("Error fetching user chats:", error);
+    console.error("Error sending message:", error);
+    throw error;
+  }
+};
+
+export const markChatAsRead = async (chatId, reader) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/chat/${chatId}/read`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders()
+      },
+      body: JSON.stringify({ reader })
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `HTTP error! Status: ${response.status}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error("Error marking chat as read:", error);
+    throw error;
+  }
+};
+
+export const getTransactions = async () => {
+  try {
+    const user = getCurrentUser();
+    if (!user) throw new Error('User not authenticated');
+    
+    const response = await fetch(`${API_BASE_URL}/wallet/${user.id}/transactions`, {
+      headers: {
+        ...getAuthHeaders()
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching transactions:", error);
     throw error;
   }
 };
