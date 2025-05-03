@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:5000/api'; // Use your actual backend server port
+const API_BASE_URL = 'http://localhost:8000/api'; 
 
 export const fetchLawyers = async () => {
   try {
@@ -69,7 +69,7 @@ export const addMoneyToWallet = async (amount) => {
 
 export const registerLawyer = async (lawyerData) => {
   try {
-    const API_BASE_URL = 'http://localhost:5000/api';
+    const API_BASE_URL = 'http://localhost:8000/api';
     const response = await fetch(`${API_BASE_URL}/lawyer/register`, {
       method: 'POST',
       headers: {
@@ -366,7 +366,7 @@ export const getUserChats = async () => {
     console.log("Fetching chats for user:", user.id);
     
     // Use direct URL to avoid routing conflicts
-    const API_BASE_URL = 'http://localhost:5000/api';
+    const API_BASE_URL = 'http://localhost:8000/api';
     const response = await fetch(`${API_BASE_URL}/chat/user/${user.id}`, {
       headers: {
         ...getAuthHeaders()
@@ -407,7 +407,7 @@ export const getLawyerChats = async (lawyerId) => {
     console.log(`Fetching chats for lawyer: ${lawyerId}`);
     
     // Use direct URL to avoid routing conflicts
-    const API_BASE_URL = 'http://localhost:5000/api';
+    const API_BASE_URL = 'http://localhost:8000/api';
     const response = await fetch(`${API_BASE_URL}/chat/lawyer/${lawyerId}`, {
       headers: {
         ...getAuthHeaders()

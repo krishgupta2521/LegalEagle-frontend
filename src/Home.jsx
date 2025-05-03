@@ -1,40 +1,8 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import { FileText, Landmark } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { fetchLawyers } from './utils/api'
 
 const Home = () => {
-    const [lawyers, setLawyers] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
-
-    useEffect(() => {
-        const getLawyers = async () => {
-            try {
-                setIsLoading(true);
-                const data = await fetchLawyers();
-                console.log("Fetched lawyers:", data);
-                
-                if (data && data.length > 0) {
-                    // Take only the first 6 lawyers for display
-                    setLawyers(data.slice(0, 6));
-                    setError(null);
-                } else {
-                    setLawyers([]);
-                    setError('No lawyers available at the moment.');
-                }
-            } catch (err) {
-                console.error('Error fetching lawyers:', err);
-                setError('Failed to load lawyers. Please try again later.');
-                setLawyers([]);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        getLawyers();
-    }, []);
-
     return (
         <div className='bg-[#F5F5F5]'>
             <div className='grid grid-cols-2 h-[90vh] relative bg-white'>
@@ -123,37 +91,27 @@ const Home = () => {
                         <div className='w-10 h-[3px] bg-[#0B0B5C] mt-1'></div>
                     </div>
 
-                    {isLoading ? (
-                        <div className="flex justify-center items-center py-10">
-                            <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#0B0B5C]"></div>
-                        </div>
-                    ) : error ? (
-                        <div className="text-center py-8 text-gray-500">
-                            {error}
-                        </div>
-                    ) : (
-                        <div className='flex gap-6 overflow-x-auto scrollbar-hide pb-2'>
-                            {lawyers.map((lawyer, idx) => (
-                                <div key={lawyer._id || idx} className='bg-[#F7F7FB] rounded-xl p-4 text-center min-w-[180px] shadow-md'>
-                                    <img 
-                                        src={lawyer.profilePicture || './lawyer1.jpg'} 
-                                        alt={lawyer.name} 
-                                        className='w-24 h-24 rounded-full mx-auto object-cover mb-3' 
-                                    />
-                                    <h4 className='font-semibold text-[#0B0B5C] text-sm'>Adv. {lawyer.name}</h4>
-                                    <p className='text-sm mt-1'>Exp: {lawyer.experience || 'N/A'} {lawyer.experience ? 'yrs' : ''}</p>
-                                    <p className='text-xs text-gray-500'>{lawyer.specialization || 'General Practice'}</p>
-                                </div>
-                            ))}
-                        </div>
-                    )}
+                    <div className='flex gap-6 overflow-x-auto scrollbar-hide pb-2'>
+                        {[
+                            { name: 'Adv. Rashmi Gupta', exp: '10 yrs', img: './lawyer1.jpg' },
+                            { name: 'Adv. Rahul Nohwal', exp: '35 yrs', img: './lawyer1.jpg' },
+                            { name: 'Adv. Shweta Ranjan', exp: '5 yrs', img: './lawyer1.jpg' },
+                            { name: 'Adv. Rashmi Gupta', exp: '12 yrs', img: './lawyer1.jpg' },
+                            { name: 'Adv. Ravinder Gupta', exp: '20 yrs', img: './lawyer1.jpg' },
+                            { name: 'Adv. Rashmi Gupta', exp: '30 yrs', img: './lawyer1.jpg' },
+                        ].map((lawyer, idx) => (
+                            <div key={idx} className='bg-[#F7F7FB] rounded-xl p-4 text-center min-w-[180px] shadow-md'>
+                                <img src={lawyer.img} alt={lawyer.name} className='w-24 h-24 rounded-full mx-auto object-cover mb-3' />
+                                <h4 className='font-semibold text-[#0B0B5C] text-sm'>{lawyer.name}</h4>
+                                <p className='text-sm mt-1'>Exp: {lawyer.exp}</p>
+                            </div>
+                        ))}
+                    </div>
 
                     <div className='flex justify-end mt-4'>
-                        <Link to="/lawyer">
-                            <button className='bg-[#743714] text-white px-6 py-2 rounded-full text-sm'>
-                                View All
-                            </button>
-                        </Link>
+                        <button className='bg-[#743714] text-white px-4 py-1 rounded-full text-sm'>
+                            More
+                        </button>
                     </div>
                 </div>
             </div>
