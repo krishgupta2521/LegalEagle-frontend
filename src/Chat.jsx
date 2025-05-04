@@ -221,7 +221,7 @@ const ChatPage = () => {
                 console.log('Creating chat room...');
                 
                 // Direct API call to ensure it works
-                const API_BASE_URL = 'http://localhost:8000/api';
+                const API_BASE_URL = 'https://legal-eagle-backend.vercel.app/';
                 const response = await fetch(`${API_BASE_URL}/chat`, {
                     method: 'POST',
                     headers: {
@@ -286,7 +286,7 @@ const ChatPage = () => {
                     console.log("Attempting to find existing chat with this lawyer");
                     
                     // Use direct API call
-                    const API_BASE_URL = 'http://localhost:8000/api';
+                    const API_BASE_URL = 'https://legal-eagle-backend.vercel.app/api';
                     const chatsResponse = await fetch(`${API_BASE_URL}/chat/user/${user.id}`, {
                         headers: {
                             'Authorization': `Bearer ${localStorage.getItem('authToken')}`

@@ -8,7 +8,7 @@ const DEFAULT_LAWYER_ID = '681587a83959e1fcc560dc0a';
 export const initSocket = () => {
   console.log("Initializing socket connection");
   const serverUrl = window.location.hostname === 'localhost' 
-    ? 'http://localhost:8000'
+    ? 'https://legal-eagle-backend.vercel.app/'
     : `${window.location.protocol}//${window.location.hostname}`;
   
   if (!socket) {
