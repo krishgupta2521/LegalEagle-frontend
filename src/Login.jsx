@@ -31,7 +31,7 @@ const Login = () => {
             setError("Fill up all the details");
             return;
         }
-        
+
         if (!form.email.includes("@")) {
             setError("Enter a valid email address");
             return;
@@ -40,7 +40,7 @@ const Login = () => {
         try {
             setLoading(true);
             setError(null);
-            
+
             // Include explicit parameter to force lawyer collection check
             const response = await loginUser({
                 email: form.email,
@@ -48,10 +48,10 @@ const Login = () => {
                 checkBoth: true,
                 isLawyerLogin: true
             });
-            
+
             // Update auth context with the full response
             login(response);
-            
+
             // Log the authentication info for debugging
             console.log("Authentication successful:", {
                 token: response.token ? "Present" : "Missing",
@@ -59,14 +59,14 @@ const Login = () => {
                 role: response.role,
                 source: response.source || 'user',
             });
-            
+
             // Successful login, redirect based on role and source
             if (response.role === 'lawyer') {
                 navigate('/dashboard');
             } else {
                 navigate('/lawyer');
             }
-            
+
         } catch (err) {
             console.error("Login error details:", err);
             setError(err.message || "Login failed. Please check your credentials.");
@@ -80,13 +80,13 @@ const Login = () => {
             <div className="w-1/2 flex justify-center items-center p-10">
                 <div className="w-96 text-center">
                     <h2 className="text-6xl font-bold mb-14 tracking-tight subpixel-antialiased">LOGIN</h2>
-                    
+
                     {error && (
                         <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg">
                             {error}
                         </div>
                     )}
-                    
+
                     <input
                         value={form.email}
                         onChange={handleChange}
@@ -95,7 +95,7 @@ const Login = () => {
                         type="email"
                         name="email"
                     />
-                    
+
                     <div className="relative w-full">
                         <input
                             ref={passwordRef}
@@ -110,7 +110,7 @@ const Login = () => {
                             <img ref={ref} width={28} src="/eye.png" alt="eye toggle" />
                         </span>
                     </div>
-                    
+
                     <button
                         onClick={handleSubmit}
                         disabled={loading}

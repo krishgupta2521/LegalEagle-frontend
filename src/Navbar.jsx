@@ -68,7 +68,7 @@ export default function Navbar() {
                             className="h-16 w-16"
                         />
                         <span className="text-3xl font-bold font-['Righteous'] text-[#0B0B5C]">
-                            Legal Eagle
+                            <Link to="/">Legal Eagle</Link>
                         </span>
                     </div>
 

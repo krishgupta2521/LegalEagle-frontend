@@ -13,15 +13,15 @@ export default function LawyerPage() {
             try {
                 setIsLoading(true);
                 const data = await fetchLawyers();
-                console.log("API response:", data); // Debug log
-                
+                console.log("API response:", data);
+
                 if (!data || data.length === 0) {
                     setError('No lawyer data available at the moment.');
                     setLawyers([]);
                     setSelected(null);
                     return;
                 }
-                
+
                 const transformedData = data.map(lawyer => ({
                     id: lawyer._id,
                     name: lawyer.name || 'Unknown Lawyer',
@@ -36,9 +36,9 @@ export default function LawyerPage() {
                     email: lawyer.email || '',
                     phone: lawyer.phone || '',
                 }));
-                
+
                 console.log("Transformed data:", transformedData); // Debug log
-                
+
                 setLawyers(transformedData);
                 if (transformedData.length > 0) {
                     setSelected(transformedData[0]);
@@ -69,7 +69,7 @@ export default function LawyerPage() {
                 </div>
             );
         }
-        
+
         return (
             <div className="flex gap-6 overflow-x-auto pb-4">
                 {lawyers.map((lawyer, index) => (
@@ -102,12 +102,12 @@ export default function LawyerPage() {
     return (
         <div className="min-h-screen text-black">
             <div
-                className="bg-cover bg-center py-16 px-10 border-b border-gray-200"
+                className="bg-cover bg-center py-16 px-10 border-b border-gray-200 opacity-90"
                 style={{
                     backgroundImage: 'url("https://s3-alpha-sig.figma.com/img/c972/0c25/51f069bca35d020c6973af94119b27da?Expires=1745798400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=X07vvrpByVjxYLrCUWl3MavP1EbG96UxUU~OZBNpelJGziCcyXh-u0emw~2jBK2OF5BYWgbTmiYSnwRgfPD-Na3PRWec1ndxpahccBQW4S~6sVp3a4XXn1Ts4ojcYWmj9bOb3ophBiznqqSiRtAFhq6fxXz2bkuYz-bdJns5AbUY2aLe2RR8va6AwgXQbD8Imf4yRq6HvSxw1Doa9K0QHuEmawd4YYqsKtcWyLvXxPNcydXKE0UWXs4R5mBbkuBRm1KaNDtjEGM7UrG2GeHhKXpDjwBa~9PhaB~yLCUkbrtk3lY~g0ZI6pni04PdCv7zcNHbUbwyT2FXIMlMje8gcA__")',
                 }}
             >
-                <h1 className="text-5xl font-bold leading-tight text-white">
+                <h1 className="text-5xl font-extrabold leading-tight text-white">
                     Book Your <span className="text-[#0B0B5C]">Trusted Lawyer</span>, – Expert Help Just a Click Away
                 </h1>
             </div>
@@ -122,7 +122,7 @@ export default function LawyerPage() {
             {/* First component: Lawyer listing section */}
             <div className="px-10 mt-16">
                 <h2 className="text-[#0B0B5C] font-semibold text-xl mb-4">CHOOSE YOUR LAWYER</h2>
-                
+
                 {isLoading ? (
                     <div className="flex justify-center items-center py-10">
                         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#0B0B5C]"></div>
@@ -196,8 +196,8 @@ export default function LawyerPage() {
                         </div>
 
                         <div className="mt-10 text-center">
-                            <Link 
-                                to="/chat" 
+                            <Link
+                                to="/chat"
                                 state={{ lawyerId: selected.id, name: selected.name, image: selected.image }}
                                 className="bg-[#0B0B5C] text-white px-8 py-3 rounded-full font-semibold text-lg shadow hover:shadow-lg inline-block"
                             >

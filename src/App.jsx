@@ -9,6 +9,7 @@ import LawyerRegister from "./LawyerRegister"
 import Dashboard from "./Dashboard";
 import Signup from "./Signup";
 import Wallet from "./Wallet";
+import FileUploader from "./FileUploader";
 import { AuthProvider, RequireAuth, useAuth } from "./utils/authContext";
 
 export default function App() {
@@ -21,6 +22,11 @@ export default function App() {
             <Route path="/lawyer" element={
               <RequireAuth>
                 <Lawyer />
+              </RequireAuth>
+            } />
+            <Route path="/upload" element={
+              <RequireAuth>
+                <FileUploader />
               </RequireAuth>
             } />
             <Route path="/chat" element={
@@ -40,7 +46,7 @@ export default function App() {
               <Dashboard />
             </RequireAuth>
           } />
-          
+
           <Route path="/lawyerregister" element={<LawyerRegister />} />
           <Route path="/clientregister" element={<ClientRegister />} />
           <Route path="/login" element={<Signup />} />
